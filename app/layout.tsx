@@ -7,36 +7,49 @@ import { Suspense } from "react"
 import "./globals.css"
 
 export const metadata: Metadata = {
-  title: "Taxi Rijnvallei - Betrouwbare Taxiservice in de Rijnvallei",
+  metadataBase: new URL("https://taxirijnvallei.nl"),
+  title: {
+    default: "Taxi Rijnvallei | Taxiservice Wageningen, Ede, Veenendaal | 24/7",
+    template: "%s | Taxi Rijnvallei",
+  },
   description:
-    "Professionele taxiservice in de Rijnvallei. 24/7 beschikbaar voor particulieren en zakelijke klanten. Betrouwbaar, veilig en betaalbaar vervoer.",
-  keywords: ["taxi", "Rijnvallei", "taxiservice", "vervoer", "Nederland", "betrouwbaar", "24/7"],
+    "Taxi Rijnvallei: betrouwbare taxiservice in Wageningen, Ede, Veenendaal en omgeving. Luchthavenvervoer Schiphol, zakelijk vervoer, 24/7 bereikbaar. Bel 0317-844466.",
+  keywords: [
+    "taxi Wageningen",
+    "taxi Ede",
+    "taxi Veenendaal",
+    "taxi Bennekom",
+    "taxi Barneveld",
+    "taxiservice Rijnvallei",
+    "luchthavenvervoer Schiphol",
+    "taxi naar Schiphol",
+    "zakelijk vervoer Wageningen",
+    "taxi 24 uur",
+    "taxi bestellen Wageningen",
+    "taxibedrijf Gelderland",
+  ],
   authors: [{ name: "Taxi Rijnvallei" }],
   creator: "Taxi Rijnvallei",
   publisher: "Taxi Rijnvallei",
+  formatDetection: {
+    telephone: true,
+    email: true,
+    address: true,
+  },
   openGraph: {
     type: "website",
     locale: "nl_NL",
     url: "https://taxirijnvallei.nl",
     siteName: "Taxi Rijnvallei",
-    title: "Taxi Rijnvallei - Betrouwbare Taxiservice in de Rijnvallei",
+    title: "Taxi Rijnvallei | Taxiservice Wageningen en omgeving | 24/7",
     description:
-      "Professionele taxiservice in de Rijnvallei. 24/7 beschikbaar voor particulieren en zakelijke klanten. Betrouwbaar, veilig en betaalbaar vervoer.",
-    images: [
-      {
-        url: "/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Taxi Rijnvallei - Professionele Taxiservice",
-      },
-    ],
+      "Betrouwbare taxiservice in Wageningen, Ede, Veenendaal en omgeving. Luchthavenvervoer, zakelijk vervoer, 24/7 bereikbaar. Bel 0317-844466.",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Taxi Rijnvallei - Betrouwbare Taxiservice",
+    title: "Taxi Rijnvallei | Taxiservice Wageningen | 24/7",
     description:
-      "Professionele taxiservice in de Rijnvallei. 24/7 beschikbaar voor particulieren en zakelijke klanten.",
-    images: ["/og-image.jpg"],
+      "Betrouwbare taxiservice in Wageningen en omgeving. Luchthavenvervoer, zakelijk vervoer, 24/7 bereikbaar.",
   },
   robots: {
     index: true,
@@ -49,7 +62,10 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
-    generator: 'v0.app'
+  alternates: {
+    canonical: "https://taxirijnvallei.nl",
+  },
+  category: "transportation",
 }
 
 export default function RootLayout({
@@ -57,8 +73,64 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "TaxiService",
+    name: "Taxi Rijnvallei",
+    description:
+      "Betrouwbare taxiservice in Wageningen, Ede, Veenendaal en omgeving. Luchthavenvervoer, zakelijk vervoer, 24/7 bereikbaar.",
+    url: "https://taxirijnvallei.nl",
+    telephone: "+31317844466",
+    email: "info@taxirijnvallei.nl",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Beekstraat 13",
+      addressLocality: "Wageningen",
+      postalCode: "6707 DR",
+      addressCountry: "NL",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 51.9692,
+      longitude: 5.6654,
+    },
+    areaServed: [
+      { "@type": "City", name: "Wageningen" },
+      { "@type": "City", name: "Ede" },
+      { "@type": "City", name: "Veenendaal" },
+      { "@type": "City", name: "Bennekom" },
+      { "@type": "City", name: "Barneveld" },
+      { "@type": "City", name: "Rhenen" },
+      { "@type": "City", name: "Renkum" },
+    ],
+    openingHoursSpecification: {
+      "@type": "OpeningHoursSpecification",
+      dayOfWeek: [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday",
+      ],
+      opens: "00:00",
+      closes: "23:59",
+    },
+    priceRange: "€€",
+    paymentAccepted: ["Cash", "Credit Card", "Debit Card", "Invoice"],
+    currenciesAccepted: "EUR",
+    sameAs: [],
+  }
+
   return (
-    <html lang="en">
+    <html lang="nl">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <Suspense fallback={null}>{children}</Suspense>
         <Analytics />

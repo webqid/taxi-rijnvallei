@@ -21,18 +21,26 @@ export default function ContactSection() {
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
                       <Phone className="w-6 h-6 text-primary" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold mb-2">Telefonisch reserveren</h3>
-                      <p className="text-muted-foreground mb-3">Direct contact met onze centrale</p>
-                      <a
-                        href="tel:+31317123456"
-                        className="text-2xl font-bold text-primary hover:text-primary/80 transition-colors"
-                      >
-                        0317-123456
-                      </a>
+                      <p className="text-muted-foreground mb-3">24/7 bereikbaar</p>
+                      <div className="space-y-1">
+                        <a
+                          href="tel:+31317844466"
+                          className="text-xl font-bold text-primary hover:text-primary/80 transition-colors block"
+                        >
+                          0317-844466
+                        </a>
+                        <a
+                          href="tel:+31647145342"
+                          className="text-lg font-semibold text-primary hover:text-primary/80 transition-colors block"
+                        >
+                          06-47145342
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </CardContent>
@@ -41,14 +49,16 @@ export default function ContactSection() {
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-secondary/20 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 bg-secondary/20 rounded-lg flex items-center justify-center shrink-0">
                       <MessageCircle className="w-6 h-6 text-secondary-foreground" />
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold mb-2">WhatsApp</h3>
                       <p className="text-muted-foreground mb-3">Snel en gemakkelijk reserveren</p>
-                      <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90">
-                        Start WhatsApp chat
+                      <Button className="bg-secondary text-secondary-foreground hover:bg-secondary/90" asChild>
+                        <a href="https://wa.me/31647145342" target="_blank" rel="noopener noreferrer">
+                          Start WhatsApp chat
+                        </a>
                       </Button>
                     </div>
                   </div>
@@ -58,15 +68,14 @@ export default function ContactSection() {
               <Card className="border-0 shadow-sm">
                 <CardContent className="p-6">
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center shrink-0">
                       <Clock className="w-6 h-6 text-primary" />
                     </div>
                     <div className="flex-1">
-                      <h3 className="font-semibold mb-2">Openingstijden</h3>
+                      <h3 className="font-semibold mb-2">Bereikbaarheid</h3>
                       <div className="space-y-1 text-muted-foreground">
-                        <p>Telefonische service: 24/7</p>
-                        <p>WhatsApp: 06:00 - 24:00</p>
-                        <p>Kantoor: Ma-Vr 08:00 - 18:00</p>
+                        <p>Telefoon: 24/7 bereikbaar</p>
+                        <p>WhatsApp: 24/7 bereikbaar</p>
                       </div>
                     </div>
                   </div>
