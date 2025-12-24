@@ -87,7 +87,7 @@ export default function ContactSection() {
           <div>
             <Card className="border-0 shadow-sm">
               <CardContent className="p-8">
-                <h3 className="text-xl font-semibold mb-6">Stuur ons een bericht</h3>
+                <h3 className="text-xl font-semibold mb-6">Stuur ons een bericht!</h3>
                 <form className="space-y-6">
                   <div className="grid grid-cols-2 gap-4">
                     <div>

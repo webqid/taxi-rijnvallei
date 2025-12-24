@@ -6,18 +6,18 @@ import { Plane, Clock, CreditCard, Euro, Users, Car, MapPin } from "lucide-react
 
 const taximeterRates = {
   standaard: {
-    capaciteit: "1–4 personen",
-    instaptarief: 4.02,
-    prijsPerKilometer: 2.96,
-    prijsPerMinuut: 0.49,
+    capaciteit: "1-4 personen",
+    instaptarief: 4.15,
+    prijsPerKilometer: 3.05,
+    prijsPerMinuut: 0.50,
   },
   groot: {
-    capaciteit: "5–8 personen",
-    instaptarief: 8.17,
-    prijsPerKilometer: 3.72,
-    prijsPerMinuut: 0.55,
+    capaciteit: "5-8 personen",
+    instaptarief: 8.44,
+    prijsPerKilometer: 3.85,
+    prijsPerMinuut: 0.57,
   },
-  wachttariefPerUur: 55.35,
+  wachttariefPerUur: 57.20,
 }
 
 const luchthavenTarieven = [
@@ -155,7 +155,8 @@ export default function RatesSection() {
             Luchthaven tarieven
           </h3>
           <p className="text-center text-muted-foreground mb-6">
-            Vaste prijzen per vertrekgebied. Klik op uw regio voor de tarieven.
+            Vaste prijzen per vertrekgebied. Klik op uw regio voor de tarieven.<br />
+            Alleen geldig bij reservering minimaal 24 uur van te voren.
           </p>
 
           <Card className="border-0 shadow-sm max-w-4xl mx-auto">
@@ -205,6 +206,16 @@ export default function RatesSection() {
               </Accordion>
             </CardContent>
           </Card>
+
+          <div className="mt-8 p-4 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 rounded-lg text-sm text-amber-800 dark:text-amber-200">
+            <p className="font-semibold mb-2">LET OP!</p>
+            <p>
+              Prijzen kunnen afwijken van de hier genoemde bedragen. Bijvoorbeeld zaterdag- en zondagochtend tussen 1 en 5 uur gelden hogere tarieven. Vraag naar de voor uw reis geldende prijs. Prijzen zijn incl. 9% BTW en per taxi tot max. 4 personen. Alleen geldig bij reservering minimaal 24 uur van te voren. Voor overige bestemmingen neemt u alstublieft contact met ons op voor een vrijblijvende offerte. Stuur een bericht of bel{" "}
+              <a href="tel:0647145342" className="font-semibold underline hover:no-underline">
+                06-47 14 53 42
+              </a>.
+            </p>
+          </div>
         </div>
 
         {/* Betaalmethoden en opmerkingen */}
