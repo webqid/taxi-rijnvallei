@@ -17,11 +17,12 @@ export default function Home() {
       <Header />
       <main>
         <HeroSection />
+        <BookingSection />
         <TrustSection />
         <ServicesSection />
         <AirportSection />
         <RatesSection />
-        <BookingSection />
+        
         <LocalSection />
         <BusinessSection />
         <CtaSection />

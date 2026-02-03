@@ -1,9 +1,10 @@
 import { Phone, MessageCircle } from "lucide-react"
+import Image from "next/image"
 import { Button } from "@/components/ui/button"
 
 export default function HeroSection() {
   return (
-    <section className="relative bg-gradient-to-br from-primary/5 to-secondary/5 py-20 lg:py-32">
+    <section className="relative bg-linear-to-br from-primary/5 to-secondary/5 py-8 lg:py-16">
       <div className="container mx-auto px-4">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
@@ -38,11 +39,12 @@ export default function HeroSection() {
           </div>
 
           <div className="relative">
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-muted">
-              <img
+            <div className="aspect-4/3  overflow-hidden bg-muted">
+              <Image
                 src="/modern-taxi-car-in-dutch-countryside-with-rijnvall.jpg"
                 alt="Taxi Rijnvallei"
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover rounded-2xl"
+                fill
               />
             </div>
           </div>
