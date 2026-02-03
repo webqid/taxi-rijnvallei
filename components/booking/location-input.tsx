@@ -220,7 +220,11 @@ export function LocationInput({
                     ? 'bg-accent text-accent-foreground'
                     : 'hover:bg-accent/50'
                 )}
-                onClick={() => handleSelectSuggestion(suggestion)}
+                onMouseDown={(e) => {
+                  // Prevent the mousedown from triggering the outside click handler
+                  e.preventDefault()
+                  handleSelectSuggestion(suggestion)
+                }}
                 onMouseEnter={() => setHighlightedIndex(index)}
               >
                 <div className="flex items-start gap-2">
