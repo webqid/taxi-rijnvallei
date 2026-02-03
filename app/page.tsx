@@ -6,6 +6,7 @@ import AirportSection from "@/components/airport-section"
 import LocalSection from "@/components/local-section"
 import BusinessSection from "@/components/business-section"
 import RatesSection from "@/components/rates-section"
+import BookingSection from "@/components/booking-section"
 import CtaSection from "@/components/cta-section"
 import ClosingSection from "@/components/closing-section"
 import Footer from "@/components/footer"
@@ -20,6 +21,7 @@ export default function Home() {
         <ServicesSection />
         <AirportSection />
         <RatesSection />
+        <BookingSection />
         <LocalSection />
         <BusinessSection />
         <CtaSection />
