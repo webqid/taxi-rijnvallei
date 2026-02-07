@@ -91,18 +91,115 @@ export async function GET(request: NextRequest) {
 
     const data = await response.json()
 
-    // Transform to our format
+    // Transform to our format with Dutch address formatting
     const suggestions: GeocodeSuggestion[] = data.map((item: {
       display_name: string
       lat: string
       lon: string
       place_id: number
-    }) => ({
-      label: item.display_name,
-      lat: parseFloat(item.lat),
-      lon: parseFloat(item.lon),
-      placeId: String(item.place_id),
-    }))
+      name?: string
+      address?: {
+        house_number?: string
+        road?: string
+        pedestrian?: string
+        footway?: string
+        cycleway?: string
+        path?: string
+        neighbourhood?: string
+        suburb?: string
+        hamlet?: string
+        city?: string
+        town?: string
+        village?: string
+        municipality?: string
+        postcode?: string
+        country?: string
+        amenity?: string
+        building?: string
+        shop?: string
+        tourism?: string
+        leisure?: string
+        office?: string
+        craft?: string
+        aeroway?: string
+        railway?: string
+        station?: string
+      }
+      type?: string
+      class?: string
+      addresstype?: string
+    }) => {
+      // Build a clean Dutch-style address
+      const addr = item.address || {}
+      
+      // Get the street name (could be road, pedestrian, footway, etc.)
+      const street = addr.road || addr.pedestrian || addr.footway || addr.cycleway || addr.path
+      const houseNumber = addr.house_number
+      
+      // Get the city (could be city, town, village, hamlet, or municipality)
+      const city = addr.city || addr.town || addr.village || addr.municipality
+      
+      // Get the postcode
+      const postcode = addr.postcode?.replace(/\s/g, '') // Remove spaces from postcode
+      
+      // Get a name for POIs (airports, stations, locations, etc.)
+      const poiName = item.name || addr.aeroway || addr.railway || addr.station || 
+                      addr.amenity || addr.building || addr.shop || 
+                      addr.tourism || addr.leisure || addr.office || addr.craft ||
+                      addr.hamlet
+      
+      // Build the label parts
+      const parts: string[] = []
+      
+      // Check if this is a named place (not a regular street address)
+      const isNamedPlace = item.addresstype === 'hamlet' || 
+                           item.addresstype === 'village' || 
+                           item.addresstype === 'town' ||
+                           item.addresstype === 'city' ||
+                           item.class === 'aeroway' ||
+                           item.class === 'railway' ||
+                           item.class === 'amenity'
+      
+      if (isNamedPlace && poiName) {
+        // For named places like Schiphol, stations, airports
+        parts.push(poiName)
+        if (city && city !== poiName) parts.push(city)
+        else if (addr.municipality && addr.municipality !== poiName) parts.push(addr.municipality)
+      } else if (street) {
+        // Standard address format: "Straatnaam 123, 1234AB, Plaatsnaam"
+        const streetPart = houseNumber ? `${street} ${houseNumber}` : street
+        parts.push(streetPart)
+        if (postcode) parts.push(postcode)
+        if (city) parts.push(city)
+      } else if (addr.neighbourhood || addr.suburb) {
+        // Fallback to neighbourhood/suburb
+        parts.push(addr.neighbourhood || addr.suburb || '')
+        if (city) parts.push(city)
+      } else if (city) {
+        // Just a city
+        parts.push(city)
+      } else if (poiName) {
+        // Named place without city context
+        parts.push(poiName)
+        if (addr.municipality) parts.push(addr.municipality)
+      } else {
+        // Fallback to display_name but shortened
+        const displayParts = item.display_name.split(',').slice(0, 3)
+        return {
+          label: displayParts.join(', ').trim(),
+          lat: parseFloat(item.lat),
+          lon: parseFloat(item.lon),
+          placeId: String(item.place_id),
+        }
+      }
+      
+      return {
+        label: parts.filter(Boolean).join(', '),
+        lat: parseFloat(item.lat),
+        lon: parseFloat(item.lon),
+        placeId: String(item.place_id),
+      }
+    })
 
     // Update cache
     cache.set(normalizedQuery, { data: suggestions, timestamp: Date.now() })

@@ -21,7 +21,7 @@ export default function CtaSection() {
   }
 
   return (
-    <section id="contact" className="py-20 bg-primary/5">
+    <section id="cta" className="py-20 bg-primary/5">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-3xl lg:text-4xl font-bold mb-4 text-balance">Reserveer uw rit</h2>

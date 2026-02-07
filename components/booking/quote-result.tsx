@@ -1,9 +1,10 @@
 'use client'
 
 import * as React from 'react'
-import { Check, TrendingUp, Clock, Route, AlertCircle } from 'lucide-react'
+import { Check, TrendingUp, Clock, Route, AlertCircle, ArrowRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
 import { formatPrice, formatDistance, formatDuration } from '@/lib/services/pricing'
 import type { QuoteResponseWithGeometry } from '@/hooks/use-quote'
 
@@ -11,9 +12,10 @@ interface QuoteResultProps {
   quote: QuoteResponseWithGeometry | null
   error: string | null
   className?: string
+  onBookClick?: () => void
 }
 
-export function QuoteResult({ quote, error, className }: QuoteResultProps) {
+export function QuoteResult({ quote, error, className, onBookClick }: QuoteResultProps) {
   if (error) {
     return (
       <Card className={cn('border-destructive/50 bg-destructive/5', className)}>
@@ -85,6 +87,17 @@ export function QuoteResult({ quote, error, className }: QuoteResultProps) {
             </div>
           </div>
         </div>
+
+        {/* Book button */}
+        {onBookClick && (
+          <Button
+            onClick={onBookClick}
+            className="w-full gap-2 bg-green-600 py-6 text-lg font-semibold hover:bg-green-700"
+          >
+            Reserveren
+            <ArrowRight className="h-5 w-5" />
+          </Button>
+        )}
 
         <p className="text-center text-xs text-muted-foreground">
           Deze prijs is indicatief en kan variëren op basis van de werkelijke route en omstandigheden.

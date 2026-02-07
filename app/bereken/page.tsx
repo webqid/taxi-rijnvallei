@@ -2,6 +2,7 @@ import { Metadata } from 'next'
 import Header from '@/components/header'
 import Footer from '@/components/footer'
 import { BookingWidget } from '@/components/booking'
+import ContactSection from '@/components/contact-section'
 
 export const metadata: Metadata = {
   title: 'Ritprijs Berekenen',
@@ -26,6 +27,7 @@ export default function BookingPage() {
             <BookingWidget />
           </div>
         </div>
+        <ContactSection />
       </main>
       <Footer />
     </div>

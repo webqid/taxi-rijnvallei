@@ -16,6 +16,7 @@ import { PassengerStepper } from './passenger-stepper'
 import { QuoteResult } from './quote-result'
 import { QuoteSkeleton, MapSkeleton } from './quote-skeleton'
 import { useQuote } from '@/hooks/use-quote'
+import { useBookingContext } from '@/lib/context/booking-context'
 import type { Location, QuoteRequest } from '@/lib/types/booking'
 
 // Lazy-loaded map component (no SSR to avoid Leaflet window errors)
@@ -56,6 +57,7 @@ const initialState: BookingFormState = {
 export function BookingWidget({ className }: { className?: string }) {
   const [formState, setFormState] = React.useState<BookingFormState>(initialState)
   const { calculateQuote, quote, isLoading, error, reset } = useQuote()
+  const { setBookingData } = useBookingContext()
 
   const updateField = <K extends keyof BookingFormState>(
     key: K,
@@ -65,6 +67,28 @@ export function BookingWidget({ className }: { className?: string }) {
     // Reset quote when form changes
     if (quote) {
       reset()
+    }
+  }
+
+  const handleBookClick = () => {
+    if (!quote || !formState.origin || !formState.destination) return
+
+    // Store booking data in context
+    setBookingData({
+      origin: formState.origin,
+      destination: formState.destination,
+      stopovers: formState.stopovers.filter((s): s is Location => s !== null),
+      pickupAt: formState.pickupAt,
+      returnAt: formState.returnEnabled ? formState.returnAt : null,
+      luggage: formState.luggage,
+      passengers: formState.passengers,
+      quote,
+    })
+
+    // Scroll to contact section
+    const contactSection = document.getElementById('contact')
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' })
     }
   }
 
@@ -245,7 +269,7 @@ export function BookingWidget({ className }: { className?: string }) {
       <div className="space-y-6">
         {quote ? (
           <>
-            <QuoteResult quote={quote} error={error} />
+            <QuoteResult quote={quote} error={error} onBookClick={handleBookClick} />
             <Card className="overflow-hidden">
               <div className="relative aspect-video bg-muted">
                 <RouteMapPreview
