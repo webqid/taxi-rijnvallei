@@ -261,8 +261,8 @@ export function BookingWidget({ className }: { className?: string }) {
           <QuoteResult quote={null} error={error} />
         ) : (
           <>
-            <QuoteSkeleton />
-            <MapSkeleton />
+            {/* <QuoteSkeleton />
+            <MapSkeleton /> */}
           </>
         )}
       </div>
