@@ -7,7 +7,7 @@ export default function ClosingSection() {
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="text-2xl font-bold mb-4">Taxi Rijnvallei</h2>
           <p className="text-muted-foreground mb-8 text-pretty">
-            Uw lokale taxidienst in Wageningen en omgeving. Betrouwbaar, bereikbaar en met transparante tarieven. Wij staan dag en nacht voor u klaar.
+            Uw lokale taxidienst in Ede en omgeving. Betrouwbaar, bereikbaar en met transparante tarieven. Wij staan dag en nacht voor u klaar.
           </p>
 
           <div className="flex flex-wrap justify-center gap-6 text-sm text-muted-foreground">

@@ -12,7 +12,7 @@ export default function LocalSection() {
             <div>
               <h2 className="text-3xl lg:text-4xl font-bold mb-4 text-balance">Lokaal en regionaal vervoer</h2>
               <p className="text-xl text-muted-foreground text-pretty leading-relaxed">
-                Taxi Rijnvallei is actief in Wageningen en de wijde omgeving. Wij kennen de regio en brengen u snel en veilig op uw bestemming.
+                Taxi Rijnvallei is actief in Ede en de wijde omgeving. Wij kennen de regio en brengen u snel en veilig op uw bestemming.
               </p>
             </div>
 
@@ -58,14 +58,14 @@ export default function LocalSection() {
                 style={{ border: 0 }}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Taxi Rijnvallei - Wageningen en omgeving"
+                title="Taxi Rijnvallei - Ede en omgeving"
               />
             </div>
             <div className="absolute bottom-4 left-4 right-4 bg-card/95 backdrop-blur-sm p-4 rounded-xl shadow-lg">
               <div className="flex items-center gap-3">
                 <MapPin className="w-6 h-6 text-primary shrink-0" />
                 <div>
-                  <h3 className="font-semibold">Wageningen en omgeving</h3>
+                  <h3 className="font-semibold">Ede en omgeving</h3>
                   <p className="text-sm text-muted-foreground">Vertrouwd met alle routes in de Rijnvallei</p>
                 </div>
               </div>

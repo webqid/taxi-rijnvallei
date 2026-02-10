@@ -26,8 +26,10 @@ export const metadata: Metadata = {
     "luchthavenvervoer Schiphol",
     "taxi naar Schiphol",
     "zakelijk vervoer Wageningen",
+    "zakelijk vervoer Ede",
     "taxi 24 uur",
     "taxi bestellen Wageningen",
+    "taxi bestellen Ede",
     "taxibedrijf Gelderland",
   ],
   authors: [{ name: "Taxi Rijnvallei" }],
@@ -49,9 +51,9 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "Taxi Rijnvallei | Taxiservice Wageningen | 24/7",
+    title: "Taxi Rijnvallei | Taxiservice Ede | 24/7",
     description:
-      "Betrouwbare taxiservice in Wageningen en omgeving. Luchthavenvervoer, zakelijk vervoer, 24/7 bereikbaar.",
+      "Betrouwbare taxiservice in Ede en omgeving. Luchthavenvervoer, zakelijk vervoer, 24/7 bereikbaar.",
   },
   robots: {
     index: true,

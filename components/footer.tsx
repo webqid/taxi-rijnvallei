@@ -8,9 +8,20 @@ export default function Footer() {
           <div>
             <div className="flex items-center space-x-2 mb-6">
               <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">TR</span>
+                <svg viewBox="0 0 24 24" className="w-5 h-5 text-primary-foreground" fill="none" stroke="currentColor" strokeWidth="2">
+                  <circle cx="12" cy="12" r="9" />
+                  <circle cx="12" cy="12" r="3" />
+                  <line x1="12" y1="3" x2="12" y2="9" />
+                  <line x1="12" y1="15" x2="12" y2="21" />
+                  <line x1="3" y1="12" x2="9" y2="12" />
+                  <line x1="15" y1="12" x2="21" y2="12" />
+                </svg>
               </div>
               <h3 className="text-xl font-bold">Taxi Rijnvallei</h3>
+            </div>
+            <div className="text-background/80 space-y-1 mb-3">
+              <p>Grootveld 27</p>
+              <p>6715EX Ede</p>
             </div>
             <div className="text-background/80 space-y-1">
               <p>Beekstraat 13</p>

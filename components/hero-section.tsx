@@ -13,7 +13,7 @@ export default function HeroSection() {
                 Taxi Rijnvallei
               </h1>
               <p className="text-xl text-muted-foreground text-pretty leading-relaxed">
-                Betrouwbaar vervoer in Wageningen en omgeving. Altijd op tijd, vaste tarieven en professionele chauffeurs. 24 uur per dag bereikbaar.
+                Betrouwbaar vervoer in Ede en omgeving. Altijd op tijd, vaste tarieven en professionele chauffeurs. 24 uur per dag bereikbaar.
               </p>
             </div>
 
