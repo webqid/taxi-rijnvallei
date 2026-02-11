@@ -8,6 +8,7 @@ import BusinessSection from "@/components/business-section"
 import RatesSection from "@/components/rates-section"
 import BookingSection from "@/components/booking-section"
 import ContactSection from "@/components/contact-section"
+import FaqSection from "@/components/faq-section"
 import CtaSection from "@/components/cta-section"
 import ClosingSection from "@/components/closing-section"
 import Footer from "@/components/footer"
@@ -25,8 +26,9 @@ export default function Home() {
         <RatesSection />
         <LocalSection />
         <BusinessSection />
+        <FaqSection />
         <ContactSection />
-        <CtaSection />
+        {/* <CtaSection /> */}
         <ClosingSection />
       </main>
       <Footer />

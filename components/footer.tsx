@@ -78,7 +78,7 @@ export default function Footer() {
         <div className="border-t border-background/20 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <div className="text-background/60 text-sm">
-              <p>© 2025 Taxi Rijnvallei. Alle rechten voorbehouden.</p>
+              <p>© {new Date().getFullYear()} Taxi Rijnvallei. Alle rechten voorbehouden.</p>
             </div>
             <div className="flex space-x-6 text-sm text-background/60">
               <a href="#" className="hover:text-background transition-colors">

@@ -6,6 +6,13 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 import { useBookingContext } from '@/lib/context/booking-context'
 import { formatPrice, formatDistance, formatDuration } from '@/lib/services/pricing'
 
@@ -27,7 +34,7 @@ export default function ContactSection() {
   const { bookingData, clearBookingData } = useBookingContext()
   const [formData, setFormData] = React.useState<ContactFormData>(initialFormState)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
-  const [submitStatus, setSubmitStatus] = React.useState<'idle' | 'success' | 'error'>('idle')
+  const [showSuccessDialog, setShowSuccessDialog] = React.useState(false)
   const [errorMessage, setErrorMessage] = React.useState('')
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -38,7 +45,6 @@ export default function ContactSection() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    setSubmitStatus('idle')
     setErrorMessage('')
 
     try {
@@ -68,11 +74,11 @@ export default function ContactSection() {
         throw new Error(data.error || 'Er is iets misgegaan')
       }
 
-      setSubmitStatus('success')
+      // Reset form and booking data, show success dialog
       setFormData(initialFormState)
       clearBookingData()
+      setShowSuccessDialog(true)
     } catch (error) {
-      setSubmitStatus('error')
       setErrorMessage(error instanceof Error ? error.message : 'Er is iets misgegaan')
     } finally {
       setIsSubmitting(false)
@@ -124,7 +130,7 @@ export default function ContactSection() {
                       </div>
                     </div>
 
-                    {bookingData.stopovers.map((stopover, index) => (
+                    {bookingData.stopovers?.map((stopover, index) => (
                       <div key={index} className="flex items-start gap-3">
                         <MapPin className="h-4 w-4 text-orange-500 mt-0.5 shrink-0" />
                         <div>
@@ -266,19 +272,8 @@ export default function ContactSection() {
                   {bookingData?.quote ? 'Bevestig uw reservering' : 'Stuur ons een bericht!'}
                 </h3>
 
-                {submitStatus === 'success' ? (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
-                      <Check className="w-8 h-8 text-green-600" />
-                    </div>
-                    <h4 className="text-xl font-semibold mb-2">Bedankt voor uw aanvraag!</h4>
-                    <p className="text-muted-foreground">
-                      Wij nemen zo snel mogelijk contact met u op om uw reservering te bevestigen.
-                    </p>
-                  </div>
-                ) : (
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    {submitStatus === 'error' && (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {errorMessage && (
                       <div className="flex items-center gap-2 p-3 bg-destructive/10 text-destructive rounded-lg text-sm">
                         <AlertCircle className="h-4 w-4 shrink-0" />
                         <span>{errorMessage}</span>
@@ -330,6 +325,12 @@ export default function ContactSection() {
                           <MapPin className="h-3 w-3 text-green-600" />
                           <span className="truncate">{bookingData.origin.label}</span>
                         </div>
+                        {bookingData.stopovers?.map((stopover, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <MapPin className="h-3 w-3 text-orange-500" />
+                            <span className="truncate">Via: {stopover.label}</span>
+                          </div>
+                        ))}
                         <div className="flex items-center gap-2">
                           <Navigation className="h-3 w-3 text-red-500" />
                           <span className="truncate">{bookingData.destination.label}</span>
@@ -388,12 +389,31 @@ export default function ContactSection() {
                       </p>
                     )}
                   </form>
-                )}
               </CardContent>
             </Card>
           </div>
         </div>
       </div>
+
+      {/* Success Dialog */}
+      <Dialog open={showSuccessDialog} onOpenChange={setShowSuccessDialog}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-center sm:text-center">
+            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-4">
+              <Check className="w-8 h-8 text-green-600" />
+            </div>
+            <DialogTitle className="text-xl">Bedankt voor uw aanvraag!</DialogTitle>
+            <DialogDescription className="text-base">
+              Wij nemen zo snel mogelijk contact met u op om uw reservering te bevestigen.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-center pt-4">
+            <Button onClick={() => setShowSuccessDialog(false)}>
+              Sluiten
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   )
 }

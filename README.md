@@ -28,6 +28,14 @@ Website for Taxi Rijnvallei - a taxi company in the Rijnvallei region (Wageninge
 - **Sitemap & robots.txt** - Automated SEO optimization
 - **Vercel Analytics** - Built-in analytics tracking
 
+### Answer Engine Optimization (AEO)
+
+- **FAQ section** - Structured Q&A content optimized for AI assistants and voice search
+- **Multiple JSON-LD schemas** - TaxiService, FAQPage, Service, HowTo, Speakable, BreadcrumbList
+- **Conversational content** - Natural language answers matching voice query patterns
+- **Entity-based markup** - Clear definitions with Wikidata IDs for locations
+- **Speakable specification** - Content marked for voice assistant readout
+
 ## Tech Stack
 
 - [Next.js 16](https://nextjs.org/) - React framework with App Router
@@ -110,12 +118,29 @@ hooks/
 └── use-quote.ts
 
 lib/
-├── config/pricing.ts    # Pricing configuration
-├── context/             # React contexts (booking)
-├── schemas/             # Zod validation schemas
-├── services/pricing.ts  # Price calculation logic
-└── types/               # TypeScript types
+├── config/faq-data.ts        # FAQ content for AEO
+├── config/pricing.ts         # Pricing configuration
+├── config/structured-data.ts # JSON-LD schemas for AEO
+├── context/                  # React contexts (booking)
+├── schemas/                  # Zod validation schemas
+├── services/pricing.ts       # Price calculation logic
+└── types/                    # TypeScript types
 ```
+
+## Structured Data (AEO)
+
+The project includes comprehensive Schema.org structured data for Answer Engine Optimization, configured in `lib/config/structured-data.ts`:
+
+| Schema | Purpose |
+|--------|---------|
+| `TaxiService` / `LocalBusiness` | Business info, services, pricing, ratings |
+| `FAQPage` | Common questions for AI assistants |
+| `Service` (ItemList) | Individual service offerings |
+| `HowTo` | Step-by-step booking instructions |
+| `SpeakableSpecification` | Voice assistant content markers |
+| `BreadcrumbList` | Navigation structure |
+
+FAQ content is defined in `lib/config/faq-data.ts` and automatically synchronized with the FAQPage schema.
 
 ## Pricing Configuration
 

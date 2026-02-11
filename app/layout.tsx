@@ -6,6 +6,7 @@ import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { QueryProvider } from "@/components/providers/query-provider"
 import { BookingProvider } from "@/lib/context/booking-context"
+import { getAllStructuredData } from "@/lib/config/structured-data"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -77,63 +78,20 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const jsonLd = {
-    "@context": "https://schema.org",
-    "@type": "TaxiService",
-    name: "Taxi Rijnvallei",
-    description:
-      "Betrouwbare taxiservice in Wageningen, Ede, Veenendaal en omgeving. Luchthavenvervoer, zakelijk vervoer, 24/7 bereikbaar.",
-    url: "https://taxirijnvallei.nl",
-    telephone: "+31317844466",
-    email: "info@taxirijnvallei.nl",
-    address: {
-      "@type": "PostalAddress",
-      streetAddress: "Beekstraat 13",
-      addressLocality: "Wageningen",
-      postalCode: "6707 DR",
-      addressCountry: "NL",
-    },
-    geo: {
-      "@type": "GeoCoordinates",
-      latitude: 51.9692,
-      longitude: 5.6654,
-    },
-    areaServed: [
-      { "@type": "City", name: "Wageningen" },
-      { "@type": "City", name: "Ede" },
-      { "@type": "City", name: "Veenendaal" },
-      { "@type": "City", name: "Bennekom" },
-      { "@type": "City", name: "Barneveld" },
-      { "@type": "City", name: "Rhenen" },
-      { "@type": "City", name: "Renkum" },
-    ],
-    openingHoursSpecification: {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-      ],
-      opens: "00:00",
-      closes: "23:59",
-    },
-    priceRange: "€€",
-    paymentAccepted: ["Cash", "Credit Card", "Debit Card", "Invoice"],
-    currenciesAccepted: "EUR",
-    sameAs: [],
-  }
+  // Get all structured data for AEO (Answer Engine Optimization)
+  const structuredData = getAllStructuredData()
 
   return (
     <html lang="nl">
       <head>
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-        />
+        {/* Structured Data for SEO and AEO */}
+        {structuredData.map((schema, index) => (
+          <script
+            key={index}
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
+          />
+        ))}
       </head>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
         <QueryProvider>
