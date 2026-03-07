@@ -6,7 +6,6 @@ import AirportSection from "@/components/airport-section"
 import LocalSection from "@/components/local-section"
 import BusinessSection from "@/components/business-section"
 import RatesSection from "@/components/rates-section"
-import BookingSection from "@/components/booking-section"
 import ContactSection from "@/components/contact-section"
 import FaqSection from "@/components/faq-section"
 import CtaSection from "@/components/cta-section"
@@ -20,7 +19,6 @@ export default function Home() {
       <main>
         <HeroSection />
         <TrustSection />
-        <BookingSection />
         <ServicesSection />
         <AirportSection />
         <RatesSection />
