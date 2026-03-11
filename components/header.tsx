@@ -12,6 +12,7 @@ export default function Header() {
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
+            <a href="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
               <svg viewBox="0 0 24 24" className="w-5 h-5 text-primary-foreground" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="9" />
@@ -23,20 +24,21 @@ export default function Header() {
               </svg>
             </div>
             <h1 className="text-xl font-bold text-foreground">Taxi Rijnvallei</h1>
+            </a>
           </div>
 
           <div className="hidden md:flex items-center space-x-6">
             <nav className="flex space-x-6">
-              <a href="#services" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a href="/#services" className="text-muted-foreground hover:text-foreground transition-colors">
                 Diensten
               </a>
-              <a href="#airport" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a href="/#airport" className="text-muted-foreground hover:text-foreground transition-colors">
                 Luchthaven
               </a>
-              <a href="#rates" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a href="/#rates" className="text-muted-foreground hover:text-foreground transition-colors">
                 Tarieven
               </a>
-              <a href="#contact" className="text-muted-foreground hover:text-foreground transition-colors">
+              <a href="/#contact" className="text-muted-foreground hover:text-foreground transition-colors">
                 Contact
               </a>
             </nav>
@@ -47,8 +49,8 @@ export default function Header() {
               <Phone className="w-4 h-4" />
               <span className="hidden sm:inline">0317-844466</span>
             </a>
-            <Button className="hidden sm:inline-flex bg-primary text-primary-foreground hover:bg-primary/90" asChild>
-              <a href="#contact">Reserveren</a>
+            <Button className="hidden sm:inline-flex bg-sky-600 text-primary-foreground hover:bg-sky-700" asChild>
+              <a href="/#contact">Reserveren</a>
             </Button>
             <button
               className="md:hidden p-2"
@@ -65,35 +67,35 @@ export default function Header() {
           <nav className="md:hidden pt-4 pb-2 border-t mt-4">
             <div className="flex flex-col space-y-3">
               <a
-                href="#services"
+                href="/#services"
                 className="text-muted-foreground hover:text-foreground transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Diensten
               </a>
               <a
-                href="#airport"
+                href="/#airport"
                 className="text-muted-foreground hover:text-foreground transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Luchthaven
               </a>
               <a
-                href="#rates"
+                href="/#rates"
                 className="text-muted-foreground hover:text-foreground transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Tarieven
               </a>
               <a
-                href="#contact"
+                href="/#contact"
                 className="text-muted-foreground hover:text-foreground transition-colors py-2"
                 onClick={() => setIsMenuOpen(false)}
               >
                 Contact
               </a>
-              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 mt-2" asChild>
-                <a href="#contact" onClick={() => setIsMenuOpen(false)}>Reserveren</a>
+              <Button className="w-full bg-sky-600 text-primary-foreground hover:bg-sky-700 mt-2" asChild>
+                <a href="/#contact" onClick={() => setIsMenuOpen(false)}>Reserveren</a>
               </Button>
             </div>
           </nav>

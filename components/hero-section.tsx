@@ -1,6 +1,7 @@
 import { Phone, MessageCircle } from "lucide-react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export default function HeroSection() {
   return (
@@ -36,6 +37,9 @@ export default function HeroSection() {
                 </a>
               </Button>
             </div>
+            <Button size="lg" variant="default" className="bg-sky-600 text-white hover:bg-sky-700 w-1/2" asChild>
+              <Link href="/#contact">RESERVEER DIRECT</Link>
+            </Button>
           </div>
 
           <div className="relative">
