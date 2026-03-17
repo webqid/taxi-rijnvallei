@@ -2,11 +2,12 @@ import type React from "react"
 import type { Metadata } from "next"
 import { GeistSans } from "geist/font/sans"
 import { GeistMono } from "geist/font/mono"
-import { Analytics } from "@vercel/analytics/next"
 import { Suspense } from "react"
 import { QueryProvider } from "@/components/providers/query-provider"
 import { BookingProvider } from "@/lib/context/booking-context"
 import { getAllStructuredData } from "@/lib/config/structured-data"
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google"
+import { CookieBar } from "@/components/cookie-bar"
 import "./globals.css"
 
 export const metadata: Metadata = {
@@ -83,7 +84,15 @@ export default function RootLayout({
 
   return (
     <html lang="nl">
+      <GoogleTagManager gtmId="GTM-WWJV82TJ" />
       <head>
+        {/* Google Consent Mode v2 — deny by default until user consents */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('consent','default',{analytics_storage:'denied',ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied'});`,
+          }}
+        />
+        
         {/* Structured Data for SEO and AEO */}
         {structuredData.map((schema, index) => (
           <script
@@ -94,13 +103,16 @@ export default function RootLayout({
         ))}
       </head>
       <body className={`font-sans ${GeistSans.variable} ${GeistMono.variable}`}>
+    
         <QueryProvider>
           <BookingProvider>
             <Suspense fallback={null}>{children}</Suspense>
           </BookingProvider>
         </QueryProvider>
-        <Analytics />
+        <CookieBar />
+        
       </body>
+      <GoogleAnalytics gaId="GTM-WWJV82TJ" />
     </html>
   )
 }
