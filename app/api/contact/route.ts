@@ -1,10 +1,6 @@
 import { NextResponse } from 'next/server'
-import { Resend } from 'resend'
 import { ContactFormSchema } from '@/lib/schemas/booking'
 import { formatPrice, formatDistance, formatDuration } from '@/lib/services/pricing'
-
-// Only initialize Resend if API key is available
-const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null
 
 export async function POST(request: Request) {
   try {
@@ -90,35 +86,28 @@ ${data.message}
       ? `Nieuwe reservering van ${data.name}`
       : `Nieuwe aanvraag van ${data.name}`
 
-    const toEmail = process.env.CONTACT_EMAIL || 'jcvandeweerd@gmail.com'
-    // Use Resend's test email for unverified domains, or configured FROM_EMAIL
-    const fromEmail = process.env.FROM_EMAIL || 'onboarding@resend.dev'
+    const accessKey = process.env.WEB3FORMS_KEY || '01f94a2a-07e4-4f29-9823-d6adf4cb39a7'
 
-    // Send email via Resend
-    if (resend) {
-      const { data: emailData, error } = await resend.emails.send({
-        from: fromEmail,
-        to: toEmail,
-        replyTo: data.email,
-        subject,
-        text: emailText,
+    const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          access_key: accessKey,
+          subject,
+          from_name: data.name,
+          replyto: data.email,
+          message: emailText,
+        }),
       })
 
-      if (error) {
-        console.error('Resend error:', error)
+      const apiResult = await res.json()
+      if (!res.ok || !apiResult.success) {
+        console.error('Web3Forms error:', apiResult)
         return NextResponse.json(
-          { error: `Fout bij verzenden: ${error.message}` },
+          { error: 'Fout bij verzenden. Probeer het later opnieuw.' },
           { status: 500 }
         )
       }
-      
-      console.log('Email sent successfully:', emailData?.id)
-    } else {
-      // Log only when no API key (development)
-      console.log('=== Contact Form Submission (no RESEND_API_KEY) ===')
-      console.log(emailText)
-      console.log('=== End Submission ===')
-    }
 
     return NextResponse.json({ success: true })
   } catch (error) {

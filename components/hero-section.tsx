@@ -9,7 +9,9 @@ export default function HeroSection() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
             <div className="space-y-4">
-              <h1 className="text-4xl lg:text-6xl font-bold text-balance leading-tight">
+              
+              <h1 className="text-4xl lg:text-6xl font-bold text-balance leading-tight flex items-center gap-4">
+                
                 Taxi Rijnvallei
               </h1>
               <p className="text-xl text-muted-foreground text-pretty leading-relaxed">

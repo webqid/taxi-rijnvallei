@@ -23,21 +23,40 @@ const initialFormState: ContactFormData = {
 
 export default function ContactSection() {
   const [formData, setFormData] = React.useState<ContactFormData>(initialFormState)
+  const [status, setStatus] = React.useState<'idle' | 'sending' | 'success' | 'error'>('idle')
+  const [errorMessage, setErrorMessage] = React.useState('')
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
+    setStatus('sending')
+    setErrorMessage('')
 
-    const subject = encodeURIComponent(`Aanvraag van ${formData.name}`)
-    const body = encodeURIComponent(
-      `Naam: ${formData.name}\nTelefoon: ${formData.phone}\nE-mail: ${formData.email}\n\n${formData.message}`
-    )
+    try {
+      const formDataObj = new FormData(e.currentTarget)
+      formDataObj.append('access_key', '01f94a2a-07e4-4f29-9823-d6adf4cb39a7')
+      formDataObj.append('subject', `Nieuw bericht via taxirijnvallei.nl van ${formData.name}`)
+      const res = await fetch('https://api.web3forms.com/submit', {
+        method: 'POST',
+        body: formDataObj,
+      })
 
-    window.open(`mailto:info@taxirijnvallei.nl?subject=${subject}&body=${body}`, '_blank')
+      const data = await res.json()
+
+      if (!data.success) {
+        throw new Error(data.message || 'Verzenden mislukt')
+      }
+
+      setStatus('success')
+      setFormData(initialFormState)
+    } catch (err) {
+      setStatus('error')
+      setErrorMessage(err instanceof Error ? err.message : 'Er is een fout opgetreden. Probeer het later opnieuw.')
+    }
   }
 
   return (
@@ -192,11 +211,24 @@ export default function ContactSection() {
                     />
                   </div>
 
+                  {status === 'success' && (
+                    <p className="text-sm text-green-600 font-medium">
+                      Uw bericht is verzonden! Wij nemen zo snel mogelijk contact met u op.
+                    </p>
+                  )}
+
+                  {status === 'error' && (
+                    <p className="text-sm text-destructive font-medium">
+                      {errorMessage}
+                    </p>
+                  )}
+
                   <Button
                     type="submit"
                     className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
+                    disabled={status === 'sending'}
                   >
-                    Verstuur aanvraag
+                    {status === 'sending' ? 'Verzenden...' : 'Verstuur aanvraag'}
                   </Button>
                 </form>
               </CardContent>
