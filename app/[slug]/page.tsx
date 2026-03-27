@@ -74,7 +74,11 @@ export default async function SlugPage({ params }: SlugPageProps) {
                                                                                 WhatsApp
                                                                         </a>
                                                                 </Button>
+
                                                         </div>
+                                                        <Button size="lg" variant="default" className="bg-sky-600 text-white hover:bg-sky-700 w-1/2" asChild>
+                                                                <a href="#contact">RESERVEER DIRECT</a>
+                                                        </Button>
                                                 </div>
                                         </div>
                                 </section>
