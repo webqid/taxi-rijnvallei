@@ -1,4 +1,5 @@
 import { Award, Clock, MapPin } from "lucide-react"
+import Image from "next/image"
 
 export default function AboutSection() {
   return (
@@ -53,11 +54,13 @@ export default function AboutSection() {
           </div>
 
           <div className="relative">
-            <div className="aspect-[4/3] rounded-2xl overflow-hidden bg-muted">
-              <img
+            <div className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-muted">
+              <Image
                 src="/professional-taxi-driver-in-uniform-standing-next-.jpg"
                 alt="Professionele chauffeur van Taxi Rijnvallei"
-                className="w-full h-full object-cover"
+                className="object-cover"
+                fill
+                sizes="(min-width: 1024px) 50vw, 100vw"
               />
             </div>
             <div className="absolute -top-6 -right-6 bg-secondary p-4 rounded-xl shadow-lg">

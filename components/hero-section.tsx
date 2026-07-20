@@ -50,6 +50,8 @@ export default function HeroSection() {
                 alt="Taxi Rijnvallei"
                 className="w-full h-full object-cover rounded-2xl"
                 fill
+                priority
+                sizes="(min-width: 1024px) 50vw, 100vw"
               />
             </div>
           </div>
