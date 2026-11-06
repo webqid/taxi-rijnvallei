@@ -11,10 +11,13 @@ export function PhotoFrame({
   photo,
   className,
   sizes,
+  quality = 75,
 }: {
   photo: Photo
   className: string
   sizes: string
+  /** 60 for wide banners: a lighter file at a size where the difference is hard to see. */
+  quality?: 60 | 75
 }) {
   return (
     <div className={cn('relative overflow-hidden bg-muted', className)}>
@@ -23,6 +26,7 @@ export function PhotoFrame({
         alt={photo.alt}
         fill
         sizes={sizes}
+        quality={quality}
         placeholder={photo.src.blurDataURL ? 'blur' : 'empty'}
         className="object-cover"
         style={{ objectPosition: photo.position }}

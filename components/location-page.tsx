@@ -105,7 +105,8 @@ export function LocationLandingPage({ location }: { location: LocationPage }) {
           <PhotoFrame
             photo={HERO_PHOTOS[location.slug]!}
             className="aspect-video rounded-2xl sm:aspect-21/9"
-            sizes="(min-width: 1280px) 1216px, 100vw"
+            sizes="(min-width: 1280px) 1200px, 100vw"
+            quality={60}
           />
         </div>
       )}

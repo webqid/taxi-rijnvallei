@@ -56,7 +56,8 @@ export default function AirportPage() {
         <PhotoFrame
           photo={SCHIPHOL_PHOTO}
           className="aspect-video rounded-2xl sm:aspect-21/9"
-          sizes="(min-width: 1280px) 1216px, 100vw"
+          sizes="(min-width: 1280px) 1200px, 100vw"
+          quality={60}
         />
       </div>
 

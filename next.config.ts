@@ -11,6 +11,8 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   images: {
     formats: ['image/avif', 'image/webp'],
+    // 75 is the default; the wide banner photos use 60 (see PhotoFrame).
+    qualities: [60, 75],
   },
   async redirects() {
     // The price calculator is hidden (SITE.features.priceCalculator): send
