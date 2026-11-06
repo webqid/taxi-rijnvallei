@@ -1,8 +1,9 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
-import { Button } from "@/components/ui/button"
+import { useEffect, useSyncExternalStore } from "react"
+import Link from "next/link"
 import { Cookie } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 const CONSENT_KEY = "cookie-consent"
 
@@ -13,27 +14,40 @@ interface ConsentState {
   marketing: ConsentValue
 }
 
-function getStoredConsent(): ConsentState | null {
-  if (typeof window === "undefined") return null
+// localStorage can be unavailable (private mode, blocked storage). The choice
+// is then kept in memory for the rest of the visit.
+let memoryConsent: string | null = null
+const listeners = new Set<() => void>()
+
+function readConsent(): string | null {
   try {
-    const stored = localStorage.getItem(CONSENT_KEY)
-    if (!stored) return null
-    return JSON.parse(stored) as ConsentState
+    return localStorage.getItem(CONSENT_KEY) ?? memoryConsent
+  } catch {
+    return memoryConsent
+  }
+}
+
+function parseConsent(raw: string | null): ConsentState | null {
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as ConsentState
   } catch {
     return null
   }
 }
 
-function storeConsent(consent: ConsentState) {
-  localStorage.setItem(CONSENT_KEY, JSON.stringify(consent))
+function subscribe(onChange: () => void) {
+  listeners.add(onChange)
+  window.addEventListener("storage", onChange)
+  return () => {
+    listeners.delete(onChange)
+    window.removeEventListener("storage", onChange)
+  }
 }
 
 function updateGtagConsent(consent: ConsentState) {
-  if (typeof window === "undefined") return
-  const w = window as unknown as Record<string, unknown>
-  if (typeof w.gtag !== "function") return
-  const gtag = w.gtag as (...args: unknown[]) => void
-  gtag("consent", "update", {
+  const gtag = (window as unknown as { gtag?: (...args: unknown[]) => void }).gtag
+  gtag?.("consent", "update", {
     analytics_storage: consent.analytics,
     ad_storage: consent.marketing,
     ad_user_data: consent.marketing,
@@ -41,39 +55,35 @@ function updateGtagConsent(consent: ConsentState) {
   })
 }
 
+function saveConsent(consent: ConsentState) {
+  memoryConsent = JSON.stringify(consent)
+  try {
+    localStorage.setItem(CONSENT_KEY, memoryConsent)
+  } catch {
+    // Storage blocked: keep the in-memory value.
+  }
+  updateGtagConsent(consent)
+  listeners.forEach((listener) => listener())
+}
+
 export function CookieBar() {
-  const [visible, setVisible] = useState(false)
+  // On the server (and during hydration) the bar is hidden; it appears in the
+  // browser only when no choice was stored yet.
+  const rawConsent = useSyncExternalStore(subscribe, readConsent, () => "server")
+  const consent = parseConsent(rawConsent)
 
+  // Re-apply a stored choice on every page load: Consent Mode starts as "denied".
   useEffect(() => {
-    const stored = getStoredConsent()
-    if (!stored) {
-      setVisible(true)
-    } else {
-      updateGtagConsent(stored)
-    }
-  }, [])
+    if (consent) updateGtagConsent(consent)
+  }, [rawConsent]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleAcceptAll = useCallback(() => {
-    const consent: ConsentState = { analytics: "granted", marketing: "granted" }
-    storeConsent(consent)
-    updateGtagConsent(consent)
-    setVisible(false)
-  }, [])
-
-  const handleNecessaryOnly = useCallback(() => {
-    const consent: ConsentState = { analytics: "denied", marketing: "denied" }
-    storeConsent(consent)
-    updateGtagConsent(consent)
-    setVisible(false)
-  }, [])
-
-  if (!visible) return null
+  if (rawConsent !== null) return null
 
   return (
     <div
       role="dialog"
       aria-label="Cookiemelding"
-      className="fixed inset-x-0 bottom-0 z-50 p-4"
+      className="fixed inset-x-0 bottom-20 z-50 p-4 md:bottom-0"
     >
       <div className="mx-auto flex max-w-3xl flex-col gap-4 rounded-xl border border-border bg-background p-5 shadow-lg sm:flex-row sm:items-center sm:gap-6">
         <div className="flex items-start gap-3 sm:items-center">
@@ -81,17 +91,21 @@ export function CookieBar() {
           <p className="text-sm text-muted-foreground">
             Wij gebruiken cookies om uw ervaring te verbeteren en ons websiteverkeer te analyseren.
             Lees ons{" "}
-            <a href="/privacybeleid" className="underline hover:text-foreground">
+            <Link href="/privacybeleid" prefetch={false} className="underline hover:text-foreground">
               privacybeleid
-            </a>{" "}
+            </Link>{" "}
             voor meer informatie.
           </p>
         </div>
         <div className="flex shrink-0 gap-2 sm:ml-auto">
-          <Button variant="outline" size="sm" onClick={handleNecessaryOnly}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => saveConsent({ analytics: "denied", marketing: "denied" })}
+          >
             Alleen noodzakelijk
           </Button>
-          <Button size="sm" onClick={handleAcceptAll}>
+          <Button size="sm" onClick={() => saveConsent({ analytics: "granted", marketing: "granted" })}>
             Accepteren
           </Button>
         </div>

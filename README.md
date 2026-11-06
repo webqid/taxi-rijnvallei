@@ -1,167 +1,100 @@
 # Taxi Rijnvallei
 
-Website for Taxi Rijnvallei - a taxi company in the Rijnvallei region (Wageningen, Ede, Veenendaal area, Netherlands).
+Website for Taxi Rijnvallei, a taxi company in Ede, Wageningen and the surrounding Rijnvallei region (Netherlands).
 
-## Features
+## Pages
 
-### Booking Widget
+| URL | Purpose |
+| --- | --- |
+| `/` | Home: booking box (destination tiles with prices, sends the ride via WhatsApp), popular rides, airport fares, reviews, how it works, work area, FAQ, contact |
+| `/taxi-ede`, `/taxi-wageningen`, `/taxi-bennekom`, `/taxi-veenendaal`, `/taxi-lunteren`, `/taxi-barneveld` | Local landing pages with local text, example route prices, fixed airport fares and a local FAQ |
+| `/taxi-schiphol` | Airport landing page: fixed fares per region, free waiting time, how pickup works |
+| `/tarieven` | Taximeter rates, example route prices, airport fares per region, price FAQ |
+| `/zakelijk-vervoer` | Business transport: invoicing, account requests |
+| `/bereken` | Price calculator with reservation request. **Hidden** (redirects to `/`) while `SITE.features.priceCalculator` is `false` |
+| `/review` | Redirects to the Google review form (short link for cards and WhatsApp) |
+| `/[slug]` | Fallback for any other one-segment URL (older ad landing pages), `noindex` |
 
-- **Real-time quote calculation** - Get instant price quotes based on distance, duration, and passenger count
-- **Address autocomplete** - Geocoding with Nominatim API, cached results, and Dutch address suggestions
-- **Route visualization** - Interactive map preview with Leaflet showing the calculated route via OSRM
-- **Stopover support** - Add intermediate stops to your journey
-- **Return trips** - Calculate round-trip fares
-- **Night surcharge** - Automatic 15% surcharge for rides between 22:00-06:00
-- **Passenger-based pricing** - Standard taxi (1-4 passengers) and large taxi (5-8 passengers) rates
-- **Luggage surcharge** - Optional extra for large luggage
+## Editing content
 
-### Contact & Booking
+Business details, prices and texts live in `lib/config`, not in the components:
 
-- **Integrated contact form** - Submit booking requests with pre-filled quote data
-- **Email notifications** - Automated emails via Resend with full booking details
-- **24/7 availability** - Call, WhatsApp, or online booking
+| File | What |
+| --- | --- |
+| `site.ts` | Phone numbers, WhatsApp, addresses, KvK, GTM ID, Google place ID, Web3Forms key |
+| `pricing.ts` | Taximeter rates, night surcharge, minimum fare |
+| `airport-fares.ts` | Fixed airport fares per region, waiting time, conditions |
+| `route-examples.ts` | Example routes with distance and driving time; prices are calculated from the taximeter rates. Set `fixedPrice` to override |
+| `locations.ts` | Text, routes and FAQ of the local landing pages |
+| `reviews.ts` | Real customer reviews and the Google rating (empty until filled in) |
+| `faq-data.ts` | FAQ texts for the home, airport and business pages |
 
-### Performance & SEO
+The FAQ answers, page titles and structured data read prices from these files, so a price change is made in one place.
 
-- **Server-side rendering** - Next.js App Router with optimized metadata
-- **Open Graph & Twitter cards** - Dynamic social media images
-- **Sitemap & robots.txt** - Automated SEO optimization
-- **Vercel Analytics** - Built-in analytics tracking
+### Price calculator
 
-### Answer Engine Optimization (AEO)
+The calculator is hidden. `SITE.features.priceCalculator` in `site.ts` is `false`, so no page links to it, `/bereken` redirects to the home page, the sitemap leaves it out and the texts don't mention it. The example route prices stay. Set the switch to `true` to bring it back; the calculator e2e tests then run again.
 
-- **FAQ section** - Structured Q&A content optimized for AI assistants and voice search
-- **Multiple JSON-LD schemas** - TaxiService, FAQPage, Service, HowTo, Speakable, BreadcrumbList
-- **Conversational content** - Natural language answers matching voice query patterns
-- **Entity-based markup** - Clear definitions with Wikidata IDs for locations
-- **Speakable specification** - Content marked for voice assistant readout
+### Call tracking
 
-## Tech Stack
+Every phone number is rendered through `components/contact-links.tsx`, with the number in its own text node exactly as in `SITE.phone.display` (`0317-844466`). Google Ads "calls from website" conversion tracking (set up in GTM) can therefore replace it with a forwarding number. Calls to action carry a `data-cta` attribute (`call-hero`, `whatsapp-bar`, ...) for GTM click triggers, and successful form submissions push a GA4 `generate_lead` event to the data layer.
 
-- [Next.js 16](https://nextjs.org/) - React framework with App Router
-- [React 19](https://react.dev/) - UI library
-- [Tailwind CSS 4](https://tailwindcss.com/) - Utility-first styling
-- [TypeScript](https://www.typescriptlang.org/) - Type safety
-- [Radix UI](https://www.radix-ui.com/) - Accessible UI primitives
-- [TanStack Query](https://tanstack.com/query) - Server state management
-- [Zod](https://zod.dev/) - Schema validation
-- [Leaflet](https://leafletjs.com/) - Interactive maps
-- [Resend](https://resend.com/) - Transactional emails
-- [Geist Font](https://vercel.com/font) - Typography
+## Architecture
 
-## Getting Started
+- [Next.js 16.4](https://nextjs.org/) App Router with [Cache Components](https://nextjs.org/docs/app/api-reference/config/next-config-js/cacheComponents) and [Partial Prefetching](https://nextjs.org/docs/app/api-reference/config/next-config-js/partialPrefetching) (`next.config.ts`)
+- All marketing pages live in the `app/(site)` route group, whose layout sets `ensureStatic = 'navigation'`: the build fails if a change would make one of them render per request
+- `app/[slug]` is the fallback for other one-segment URLs (old ad landing pages). A handful of slugs are prerendered (`generateStaticParams`); any other valid slug is rendered on its first visit and then stored in the ISR cache, so later visits come from the CDN (see the ISR with Cache Components guide)
+- `proxy.ts` answers URLs that can never be a page (`/wp-login.php`, `/privacybeleid`, ...) with a real 404, because a streamed page cannot change its 200 status afterwards. Its matcher only covers such URLs, so cached pages never pass through it. Remove `/privacybeleid` and `/algemene-voorwaarden` from it when those pages exist
+- The footer year is captured with `use cache`, because `new Date()` is not allowed while prerendering
+- Geocoding (Nominatim) and routing (OSRM) results are cached with `use cache: remote` (`lib/services`), shared between server instances where the platform provides a remote cache handler
+- React 19.3, Tailwind CSS 4, TypeScript, Radix UI primitives, TanStack Query (price calculator only), Zod, Leaflet
 
-Install dependencies:
+The Next.js documentation for the installed version is in `node_modules/next/dist/docs/`.
+
+## Getting started
 
 ```bash
 pnpm install
-```
-
-Run the development server:
-
-```bash
 pnpm dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the website.
-
-## Environment Variables
-
-Create a `.env.local` file with:
-
-```env
-RESEND_API_KEY=your_resend_api_key
-```
+Open [http://localhost:3000](http://localhost:3000). No environment variables are required.
 
 ## Scripts
 
 ```bash
-pnpm dev          # Start development server
-pnpm build        # Build for production
-pnpm start        # Start production server
-pnpm lint         # Run ESLint
-pnpm test         # Run unit tests (Vitest)
-pnpm test:unit    # Run unit tests once
-pnpm test:e2e     # Run E2E tests (Playwright)
-pnpm test:e2e:ui  # Run E2E tests with UI
+pnpm dev          # Development server
+pnpm build        # Production build (includes type checking)
+pnpm start        # Production server
+pnpm lint         # ESLint (flat config, eslint.config.mjs)
+pnpm typecheck    # TypeScript
+pnpm test         # Unit tests (Vitest, watch mode)
+pnpm test:unit    # Unit tests once
+pnpm test:e2e     # E2E tests (Playwright)
 ```
 
 ## Testing
 
-- **Unit tests** - Vitest for pricing calculations and business logic
-- **E2E tests** - Playwright for booking widget and contact form flows
+- **Unit tests** (`lib/services/__tests__`): pricing, fixed airport fares, night and weekend surcharges. Times are tested in Dutch time, independent of the machine's time zone.
+- **E2E tests** (`e2e/`): price calculator, contact and reservation forms, landing pages, mobile call bar, `/review`. Web3Forms is mocked, so the tests never send real e-mails. The calculator tests use the real Nominatim and OSRM services. Set `BASE_URL` to test a server that is already running, and `E2E_PRODUCTION=1` as well when that is a production build (`next start`), which enables the caching test.
 
-## Project Structure
-
-```
-app/
-├── api/
-│   ├── contact/     # Contact form submission & email
-│   ├── geocode/     # Address autocomplete (Nominatim)
-│   ├── quote/       # Price calculation
-│   └── route/       # Route calculation (OSRM)
-├── bereken/         # Quote calculator page
-└── layout.tsx       # Root layout with metadata
-
-components/
-├── booking/         # Booking widget components
-│   ├── booking-widget.tsx
-│   ├── location-input.tsx
-│   ├── route-map-preview.tsx
-│   └── ...
-├── ui/              # Radix-based UI components
-└── *.tsx            # Page sections
-
-hooks/
-├── use-debounce.ts
-├── use-geocode-suggestions.ts
-└── use-quote.ts
-
-lib/
-├── config/faq-data.ts        # FAQ content for AEO
-├── config/pricing.ts         # Pricing configuration
-├── config/structured-data.ts # JSON-LD schemas for AEO
-├── context/                  # React contexts (booking)
-├── schemas/                  # Zod validation schemas
-├── services/pricing.ts       # Price calculation logic
-└── types/                    # TypeScript types
-```
-
-## Structured Data (AEO)
-
-The project includes comprehensive Schema.org structured data for Answer Engine Optimization, configured in `lib/config/structured-data.ts`:
-
-| Schema | Purpose |
-|--------|---------|
-| `TaxiService` / `LocalBusiness` | Business info, services, pricing, ratings |
-| `FAQPage` | Common questions for AI assistants |
-| `Service` (ItemList) | Individual service offerings |
-| `HowTo` | Step-by-step booking instructions |
-| `SpeakableSpecification` | Voice assistant content markers |
-| `BreadcrumbList` | Navigation structure |
-
-FAQ content is defined in `lib/config/faq-data.ts` and automatically synchronized with the FAQPage schema.
-
-## Pricing Configuration
-
-Pricing is configured in `lib/config/pricing.ts`:
-
-- **Standard taxi** (1-4 passengers): €4.15 base + €3.05/km + €0.50/min
-- **Large taxi** (5-8 passengers): €8.44 base + €3.85/km + €0.57/min
-- **Night surcharge**: 15% (22:00-06:00)
-- **Luggage surcharge**: €2.50
-- **Minimum fare**: €12.00
-
-## API Routes
+## API routes
 
 | Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/api/geocode` | GET | Address autocomplete with caching |
-| `/api/quote` | POST | Calculate ride price |
-| `/api/route` | POST | Get route geometry for map |
-| `/api/contact` | POST | Submit contact/booking form |
+| --- | --- | --- |
+| `/api/geocode` | GET | Address suggestions (Nominatim), rate limited |
+| `/api/quote` | POST | Route (OSRM) and price, with fixed fares for airport rides, rate limited |
 
-All API routes include rate limiting for abuse prevention.
+The contact form posts directly from the browser to [Web3Forms](https://web3forms.com).
+
+## Pricing
+
+- **Standard taxi** (1–4 passengers): €4.15 base + €3.05/km + €0.50/min
+- **Large taxi** (5–8 passengers): €8.44 base + €3.85/km + €0.57/min
+- **Night surcharge**: 15% (22:00–06:00, Dutch time)
+- **Luggage surcharge**: €2.50
+- **Minimum fare**: €12.00
+- **Airport rides** between a fare region and an airport use the fixed fares from `airport-fares.ts` (1–4 passengers, no stopovers)
 
 ## Branch
 

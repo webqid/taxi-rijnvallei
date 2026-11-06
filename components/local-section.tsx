@@ -1,56 +1,65 @@
-import { MapPin } from "lucide-react"
+import Link from 'next/link'
+import { MapPin } from 'lucide-react'
+import { findLocationByName } from '@/lib/config/locations'
 
-const primaryAreas = ["Wageningen", "Ede", "Veenendaal", "Bennekom", "Barneveld"]
-const secondaryAreas = ["Rhenen", "Renkum", "Doorwerth", "Harskamp", "Lunteren", "Woudenberg", "Scherpenzeel"]
+const primaryAreas = ['Ede', 'Wageningen', 'Bennekom', 'Veenendaal', 'Lunteren', 'Barneveld']
+const secondaryAreas = ['Rhenen', 'Renkum', 'Doorwerth', 'Oosterbeek', 'Harskamp', 'Otterlo', 'Woudenberg', 'Scherpenzeel']
+
+function AreaChip({ name, primary }: { name: string; primary: boolean }) {
+  const location = findLocationByName(name)
+  const className = primary
+    ? 'rounded-full bg-primary/10 px-3 py-1 text-sm font-medium text-primary'
+    : 'rounded-full bg-muted px-3 py-1 text-sm'
+
+  return location ? (
+    <Link href={`/${location.slug}`} className={`${className} transition-colors hover:bg-primary hover:text-primary-foreground`}>
+      Taxi {name}
+    </Link>
+  ) : (
+    <span className={className}>{name}</span>
+  )
+}
 
 export default function LocalSection() {
   return (
-    <section id="local" className="py-20 bg-muted/30">
+    <section id="local" className="bg-muted/30 py-20">
       <div className="container mx-auto px-4">
-        <div className="grid lg:grid-cols-2 gap-12 items-center">
+        <div className="grid items-center gap-12 lg:grid-cols-2">
           <div className="space-y-6">
             <div>
-              <h2 className="text-3xl lg:text-4xl font-bold mb-4 text-balance">Lokaal en regionaal vervoer</h2>
-              <p className="text-xl text-muted-foreground text-pretty leading-relaxed">
-                Taxi Rijnvallei is actief in Ede en de wijde omgeving. Wij kennen de regio en brengen u snel en veilig op uw bestemming.
+              <h2 className="mb-4 text-3xl font-bold text-balance lg:text-4xl">Lokaal en regionaal vervoer</h2>
+              <p className="text-xl leading-relaxed text-pretty text-muted-foreground">
+                Taxi Rijnvallei is actief in Ede, Wageningen en de wijde omgeving. Wij kennen de regio en
+                brengen u snel en veilig op uw bestemming.
               </p>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-3">Primair werkgebied</h3>
+              <h3 className="mb-3 font-semibold">Primair werkgebied</h3>
               <div className="flex flex-wrap gap-2">
-                {primaryAreas.map((area, index) => (
-                  <span
-                    key={index}
-                    className="bg-primary/10 text-primary px-3 py-1 rounded-full text-sm font-medium"
-                  >
-                    {area}
-                  </span>
+                {primaryAreas.map((area) => (
+                  <AreaChip key={area} name={area} primary />
                 ))}
               </div>
             </div>
 
             <div>
-              <h3 className="font-semibold mb-3">Daarnaast actief in</h3>
+              <h3 className="mb-3 font-semibold">Daarnaast actief in</h3>
               <div className="flex flex-wrap gap-2">
-                {secondaryAreas.map((area, index) => (
-                  <span
-                    key={index}
-                    className="bg-muted px-3 py-1 rounded-full text-sm"
-                  >
-                    {area}
-                  </span>
+                {secondaryAreas.map((area) => (
+                  <AreaChip key={area} name={area} primary={false} />
                 ))}
               </div>
             </div>
 
             <p className="text-muted-foreground">
-              Woont u in een andere plaats? Neem contact met ons op. Wij rijden door de hele regio en daarbuiten.
+              Woont u in een andere plaats? Neem contact met ons op. Wij rijden door de hele regio en
+              daarbuiten.
             </p>
           </div>
 
           <div className="relative">
-            <div className="aspect-square rounded-2xl overflow-hidden bg-muted">
+            <div className="aspect-square overflow-hidden rounded-2xl bg-muted">
               <iframe
                 src="https://www.openstreetmap.org/export/embed.html?bbox=5.5%2C51.9%2C5.8%2C52.05&layer=mapnik&marker=51.9692%2C5.6654"
                 width="100%"
@@ -58,14 +67,14 @@ export default function LocalSection() {
                 style={{ border: 0 }}
                 loading="lazy"
                 referrerPolicy="no-referrer-when-downgrade"
-                title="Taxi Rijnvallei - Ede en omgeving"
+                title="Kaart van het werkgebied van Taxi Rijnvallei rond Ede en Wageningen"
               />
             </div>
-            <div className="absolute bottom-4 left-4 right-4 bg-card/95 backdrop-blur-sm p-4 rounded-xl shadow-lg">
+            <div className="absolute right-4 bottom-4 left-4 rounded-xl bg-card/95 p-4 shadow-lg backdrop-blur-sm">
               <div className="flex items-center gap-3">
-                <MapPin className="w-6 h-6 text-primary shrink-0" />
+                <MapPin className="size-6 shrink-0 text-primary" aria-hidden="true" />
                 <div>
-                  <h3 className="font-semibold">Ede en omgeving</h3>
+                  <p className="font-semibold">Ede, Wageningen en omgeving</p>
                   <p className="text-sm text-muted-foreground">Vertrouwd met alle routes in de Rijnvallei</p>
                 </div>
               </div>

@@ -1,4 +1,5 @@
 import { ImageResponse } from "next/og"
+import { SteeringWheelIcon } from "@/components/steering-wheel"
 
 export const size = {
   width: 32,
@@ -16,26 +17,11 @@ export default function Icon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#f59e0b",
-          borderRadius: "6px",
+          background: "#fbbf24",
+          borderRadius: "16px",
         }}
       >
-        <svg
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#1a1a2e"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <circle cx="12" cy="12" r="3" />
-          <line x1="12" y1="2" x2="12" y2="9" />
-          <line x1="4.93" y1="18.36" x2="9.17" y2="14.12" />
-          <line x1="19.07" y1="18.36" x2="14.83" y2="14.12" />
-        </svg>
+        <SteeringWheelIcon width="26" height="26" stroke="#171717" strokeWidth={2.25} />
       </div>
     ),
     {

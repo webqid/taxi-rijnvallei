@@ -11,6 +11,7 @@ interface DateTimeInputProps {
   label: string
   value: string | null
   onChange: (value: string | null) => void
+  /** Earliest allowed moment as ISO string. Defaults to now. */
   minDateTime?: string
   className?: string
 }
@@ -25,13 +26,33 @@ function toLocalDateTimeString(date: Date): string {
 }
 
 function toISOString(localDateTime: string): string {
-  const date = new Date(localDateTime)
-  return date.toISOString()
+  return new Date(localDateTime).toISOString()
 }
 
 function fromISOString(isoString: string): string {
-  const date = new Date(isoString)
-  return toLocalDateTimeString(date)
+  return toLocalDateTimeString(new Date(isoString))
+}
+
+/** Now, rounded up to the next quarter of an hour, in the visitor's local time. */
+function nextQuarterHour(): string {
+  const now = new Date()
+  now.setMinutes(Math.ceil(now.getMinutes() / 15) * 15, 0, 0)
+  return toLocalDateTimeString(now)
+}
+
+const subscribeNever = () => () => {}
+
+/**
+ * True in the browser, false while prerendering on the server. The current time
+ * must not be read during prerendering (it would be frozen into the static HTML
+ * and differ from the visitor's local time).
+ */
+function useIsBrowser() {
+  return React.useSyncExternalStore(
+    subscribeNever,
+    () => true,
+    () => false
+  )
 }
 
 export function DateTimeInput({
@@ -42,26 +63,13 @@ export function DateTimeInput({
   minDateTime,
   className,
 }: DateTimeInputProps) {
-  // Calculate minimum datetime
-  const getMinDateTime = () => {
-    if (minDateTime) return minDateTime
-    const now = new Date()
-    // Round up to next 15 minutes
-    now.setMinutes(Math.ceil(now.getMinutes() / 15) * 15)
-    now.setSeconds(0, 0)
-    return toLocalDateTimeString(now)
-  }
+  const isBrowser = useIsBrowser()
+  const min = minDateTime ? fromISOString(minDateTime) : isBrowser ? nextQuarterHour() : undefined
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const localValue = e.target.value
-    if (localValue) {
-      onChange(toISOString(localValue))
-    } else {
-      onChange(null)
-    }
+    onChange(localValue ? toISOString(localValue) : null)
   }
-
-  const displayValue = value ? fromISOString(value) : ''
 
   return (
     <div className={cn('space-y-1.5', className)}>
@@ -73,12 +81,12 @@ export function DateTimeInput({
         <Input
           id={id}
           type="datetime-local"
-          value={displayValue}
+          value={value ? fromISOString(value) : ''}
           onChange={handleChange}
-          min={getMinDateTime()}
+          min={min}
           className="pr-10"
         />
-        <Clock className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+        <Clock className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
       </div>
     </div>
   )

@@ -1,12 +1,7 @@
 'use client'
 
 import { useMutation } from '@tanstack/react-query'
-import type { QuoteRequest, QuoteResponse } from '@/lib/types/booking'
-
-interface QuoteResponseWithGeometry extends QuoteResponse {
-  geometry?: string
-  returnGeometry?: string
-}
+import type { QuoteRequest, QuoteResponseWithGeometry } from '@/lib/types/booking'
 
 async function fetchQuote(request: QuoteRequest): Promise<QuoteResponseWithGeometry> {
   const response = await fetch('/api/quote', {
@@ -41,4 +36,4 @@ export function useQuote() {
   }
 }
 
-export type { QuoteResponseWithGeometry }
+export type { QuoteResponseWithGeometry } from '@/lib/types/booking'

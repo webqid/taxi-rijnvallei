@@ -1,105 +1,64 @@
-"use client"
+import Link from 'next/link'
+import { Phone } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { PhoneLink } from '@/components/contact-links'
+import { LogoMark } from '@/components/steering-wheel'
+import { MobileMenu } from '@/components/mobile-menu'
+import { SITE } from '@/lib/config/site'
 
-import { useState } from "react"
-import { Phone, Menu, X } from "lucide-react"
-import { Button } from "@/components/ui/button"
+export const NAV_ITEMS = [
+  { href: '/taxi-schiphol', label: 'Luchthaven' },
+  { href: '/zakelijk-vervoer', label: 'Zakelijk' },
+  { href: '/tarieven', label: 'Tarieven' },
+  { href: '/#local', label: 'Werkgebied' },
+  { href: '/#contact', label: 'Contact' },
+] as const
+
+/** "Reserveren" goes to the calculator when it is enabled, otherwise to the contact form. */
+const RESERVE_CTA = SITE.features.priceCalculator
+  ? { href: '/bereken', label: 'Ritprijs berekenen & reserveren' }
+  : { href: '/#contact', label: 'Reserveren' }
+
+export function Logo() {
+  return (
+    <Link href="/" className="flex items-center gap-2.5" aria-label={`${SITE.name}, naar de homepage`}>
+      <LogoMark />
+      <span className="text-lg font-bold text-foreground sm:text-xl">{SITE.name}</span>
+    </Link>
+  )
+}
 
 export default function Header() {
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-
   return (
     <header className="sticky-header">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-2">
-            <a href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-              <svg viewBox="0 0 24 24" className="w-5 h-5 text-primary-foreground" fill="none" stroke="currentColor" strokeWidth="2">
-                <circle cx="12" cy="12" r="9" />
-                <circle cx="12" cy="12" r="3" />
-                <line x1="12" y1="3" x2="12" y2="9" />
-                <line x1="12" y1="15" x2="12" y2="21" />
-                <line x1="3" y1="12" x2="9" y2="12" />
-                <line x1="15" y1="12" x2="21" y2="12" />
-              </svg>
-            </div>
-            <h1 className="text-xl font-bold text-foreground">Taxi Rijnvallei</h1>
-            </a>
-          </div>
+      <div className="container mx-auto flex items-center justify-between gap-4 px-4 py-3">
+        <Logo />
 
-          <div className="hidden md:flex items-center space-x-6">
-            <nav className="flex space-x-6">
-              <a href="/#services" className="text-muted-foreground hover:text-foreground transition-colors">
-                Diensten
-              </a>
-              <a href="/#airport" className="text-muted-foreground hover:text-foreground transition-colors">
-                Luchthaven
-              </a>
-              <a href="/#rates" className="text-muted-foreground hover:text-foreground transition-colors">
-                Tarieven
-              </a>
-              <a href="/#contact" className="text-muted-foreground hover:text-foreground transition-colors">
-                Contact
-              </a>
-            </nav>
-          </div>
-
-          <div className="flex items-center space-x-3">
-            <a href="tel:+31317844466" className="flex items-center space-x-2 text-primary font-semibold">
-              <Phone className="w-4 h-4" />
-              <span className="hidden sm:inline">0317-844466</span>
-            </a>
-            <Button className="hidden sm:inline-flex bg-sky-600 text-primary-foreground hover:bg-sky-700" asChild>
-              <a href="/#contact">Reserveren</a>
-            </Button>
-            <button
-              className="md:hidden p-2"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              aria-label="Menu"
+        <nav aria-label="Hoofdmenu" className="hidden items-center gap-6 lg:flex">
+          {NAV_ITEMS.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="text-muted-foreground transition-colors hover:text-foreground"
             >
-              {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-        </div>
+              {item.label}
+            </Link>
+          ))}
+        </nav>
 
-        {/* Mobile menu */}
-        {isMenuOpen && (
-          <nav className="md:hidden pt-4 pb-2 border-t mt-4">
-            <div className="flex flex-col space-y-3">
-              <a
-                href="/#services"
-                className="text-muted-foreground hover:text-foreground transition-colors py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Diensten
-              </a>
-              <a
-                href="/#airport"
-                className="text-muted-foreground hover:text-foreground transition-colors py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Luchthaven
-              </a>
-              <a
-                href="/#rates"
-                className="text-muted-foreground hover:text-foreground transition-colors py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Tarieven
-              </a>
-              <a
-                href="/#contact"
-                className="text-muted-foreground hover:text-foreground transition-colors py-2"
-                onClick={() => setIsMenuOpen(false)}
-              >
-                Contact
-              </a>
-              <Button className="w-full bg-sky-600 text-primary-foreground hover:bg-sky-700 mt-2" asChild>
-                <a href="/#contact" onClick={() => setIsMenuOpen(false)}>Reserveren</a>
-              </Button>
-            </div>
-          </nav>
-        )}
+        <div className="flex items-center gap-2">
+          <PhoneLink
+            cta="header"
+            className="hidden items-center gap-2 font-semibold text-primary sm:flex"
+          >
+            <Phone className="size-4" aria-hidden="true" />
+            <span>{SITE.phone.display}</span>
+          </PhoneLink>
+          <Button variant="cta" className="hidden sm:inline-flex" asChild>
+            <Link href={RESERVE_CTA.href}>Reserveren</Link>
+          </Button>
+          <MobileMenu items={NAV_ITEMS} cta={RESERVE_CTA} />
+        </div>
       </div>
     </header>
   )

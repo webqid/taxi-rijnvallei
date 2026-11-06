@@ -1,20 +1,24 @@
 import { describe, it, expect } from 'vitest'
 import {
   isNightTime,
+  isWeekendNight,
   calculateLegPrice,
   calculateQuote,
+  estimateMeterFareCents,
+  findAirport,
+  findFixedAirportFare,
   formatPrice,
+  formatEuro,
   formatDuration,
   formatDistance,
 } from '@/lib/services/pricing'
 import { PRICING_CONFIG } from '@/lib/config/pricing'
 import type { QuoteRequest, RouteResult } from '@/lib/types/booking'
 
-// Helper to create ISO string for a specific local hour
-function createLocalTimeISO(hour: number, minute: number = 0): string {
-  const date = new Date()
-  date.setHours(hour, minute, 0, 0)
-  return date.toISOString()
+// ISO string for a given hour in Dutch time on Wednesday 14 January 2026
+// (CET, UTC+1), independent of the time zone of the machine running the tests.
+function createLocalTimeISO(hour: number, minute: number = 0, day: number = 14): string {
+  return new Date(Date.UTC(2026, 0, day, hour - 1, minute)).toISOString()
 }
 
 describe('isNightTime', () => {
@@ -259,11 +263,116 @@ describe('formatDuration', () => {
 })
 
 describe('formatDistance', () => {
-  it('should format meters to km', () => {
-    expect(formatDistance(10000)).toBe('10.0 km')
+  it('should format meters to km with a Dutch decimal comma', () => {
+    expect(formatDistance(10000)).toBe('10,0 km')
   })
 
   it('should handle decimals', () => {
-    expect(formatDistance(15500)).toBe('15.5 km')
+    expect(formatDistance(15500)).toBe('15,5 km')
+  })
+})
+
+describe('isWeekendNight', () => {
+  it('should be true on Saturday 03:00', () => {
+    expect(isWeekendNight(createLocalTimeISO(3, 0, 17))).toBe(true)
+  })
+
+  it('should be true on Sunday 01:30', () => {
+    expect(isWeekendNight(createLocalTimeISO(1, 30, 18))).toBe(true)
+  })
+
+  it('should be false on Saturday 05:00', () => {
+    expect(isWeekendNight(createLocalTimeISO(5, 0, 17))).toBe(false)
+  })
+
+  it('should be false on a weekday night', () => {
+    expect(isWeekendNight(createLocalTimeISO(3, 0, 14))).toBe(false)
+  })
+})
+
+describe('estimateMeterFareCents', () => {
+  it('should use the standard taximeter rates', () => {
+    // 415 + 3.6 km * 305 + 7 min * 50 = 415 + 1098 + 350
+    expect(estimateMeterFareCents(3.6, 7)).toBe(1863)
+  })
+
+  it('should apply the minimum fare', () => {
+    expect(estimateMeterFareCents(0.5, 1)).toBe(PRICING_CONFIG.minimumFareCents)
+  })
+})
+
+describe('fixed airport fares', () => {
+  const schiphol = { label: 'Schiphol (Amsterdam Airport)', lat: 52.3096, lon: 4.7622 }
+  const bennekom = { label: 'Dorpsstraat 1, 6721 JK, Bennekom', lat: 51.9987, lon: 5.6757, city: 'Bennekom' }
+  const lunteren = { label: 'Dorpsstraat 10, 6741 AM, Lunteren', lat: 52.0853, lon: 5.6202 }
+  const utrecht = { label: 'Stationsplein, 3511 ED, Utrecht', lat: 52.0894, lon: 5.1098, city: 'Utrecht' }
+  const airportRoute: RouteResult = { distanceMeters: 90600, durationSeconds: 4380 }
+
+  const airportRequest: QuoteRequest = {
+    origin: bennekom,
+    destination: schiphol,
+    stopovers: [],
+    pickupAt: createLocalTimeISO(14, 0),
+    returnAt: null,
+    luggage: true,
+    passengers: 2,
+  }
+
+  it('should recognise an airport by its coordinates', () => {
+    expect(findAirport(schiphol)?.id).toBe('schiphol')
+    expect(findAirport(bennekom)).toBeUndefined()
+  })
+
+  it('should find the drop-off fare from a fare region', () => {
+    const fare = findFixedAirportFare(bennekom, schiphol, 2)
+    expect(fare?.direction).toBe('dropOff')
+    expect(fare?.fare.dropOff).toBe(150)
+  })
+
+  it('should read the place from the label when the city is missing', () => {
+    const fare = findFixedAirportFare(schiphol, lunteren, 4)
+    expect(fare?.direction).toBe('pickUp')
+    expect(fare?.fare.pickUp).toBe(170)
+  })
+
+  it('should not use a fixed fare outside the fare regions or for a large taxi', () => {
+    expect(findFixedAirportFare(utrecht, schiphol, 2)).toBeNull()
+    expect(findFixedAirportFare(bennekom, schiphol, 5)).toBeNull()
+  })
+
+  it('should quote the fixed fare instead of the taximeter', () => {
+    const result = calculateQuote(airportRoute, null, airportRequest)
+    expect(result.pricing).toBe('fixed')
+    expect(result.totalCents).toBe(15000)
+    expect(result.breakdown).toHaveLength(1)
+  })
+
+  it('should quote the round-trip fare and mention the free waiting time', () => {
+    const result = calculateQuote(airportRoute, airportRoute, {
+      ...airportRequest,
+      returnAt: createLocalTimeISO(18, 0, 21),
+    })
+    expect(result.totalCents).toBe(30000)
+    expect(result.notes.some((note) => note.includes('45 minuten gratis wachttijd'))).toBe(true)
+  })
+
+  it('should warn about higher fares on weekend nights', () => {
+    const result = calculateQuote(airportRoute, null, {
+      ...airportRequest,
+      pickupAt: createLocalTimeISO(3, 0, 17),
+    })
+    expect(result.notes.some((note) => note.includes('zaterdag- en zondagochtend'))).toBe(true)
+  })
+
+  it('should fall back to the taximeter when there is a stopover', () => {
+    const result = calculateQuote(airportRoute, null, { ...airportRequest, stopovers: [lunteren] })
+    expect(result.pricing).toBe('meter')
+  })
+})
+
+describe('formatEuro', () => {
+  it('should format whole euros like the tariff tables', () => {
+    expect(formatEuro(150)).toBe('€150')
+    expect(formatEuro(17.4)).toBe('€17')
   })
 })

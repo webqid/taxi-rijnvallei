@@ -40,7 +40,7 @@
 }
 
 @theme inline {
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
 
   /* Primary Colors */
   --color-primary: var(--primary);

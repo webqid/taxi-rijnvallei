@@ -1,8 +1,7 @@
 'use client'
 
 import * as React from 'react'
-import type { Location, QuoteRequest } from '@/lib/types/booking'
-import type { QuoteResponseWithGeometry } from '@/hooks/use-quote'
+import type { Location, QuoteResponseWithGeometry } from '@/lib/types/booking'
 
 export interface BookingData {
   origin: Location | null
@@ -21,36 +20,31 @@ interface BookingContextType {
   clearBookingData: () => void
 }
 
-const BookingContext = React.createContext<BookingContextType | null>(null)
+// Outside a <BookingProvider> (every page without the price calculator) the
+// contact form simply has no booking data.
+const noBooking: BookingContextType = {
+  bookingData: null,
+  setBookingData: () => {},
+  clearBookingData: () => {},
+}
+
+const BookingContext = React.createContext<BookingContextType>(noBooking)
 
 export function BookingProvider({ children }: { children: React.ReactNode }) {
-  const [bookingData, setBookingDataState] = React.useState<BookingData | null>(null)
+  const [bookingData, setBookingData] = React.useState<BookingData | null>(null)
 
-  const setBookingData = React.useCallback((data: BookingData) => {
-    setBookingDataState(data)
-  }, [])
-
-  const clearBookingData = React.useCallback(() => {
-    setBookingDataState(null)
-  }, [])
-
-  return (
-    <BookingContext.Provider
-      value={{
-        bookingData,
-        setBookingData,
-        clearBookingData,
-      }}
-    >
-      {children}
-    </BookingContext.Provider>
+  const value = React.useMemo(
+    () => ({
+      bookingData,
+      setBookingData,
+      clearBookingData: () => setBookingData(null),
+    }),
+    [bookingData]
   )
+
+  return <BookingContext.Provider value={value}>{children}</BookingContext.Provider>
 }
 
 export function useBookingContext() {
-  const context = React.useContext(BookingContext)
-  if (!context) {
-    throw new Error('useBookingContext must be used within a BookingProvider')
-  }
-  return context
+  return React.useContext(BookingContext)
 }

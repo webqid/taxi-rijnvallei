@@ -1,15 +1,18 @@
 import { ImageResponse } from "next/og"
+import { SITE } from "@/lib/config/site"
+import { SteeringWheelIcon } from "@/components/steering-wheel"
 
-export const runtime = "edge"
+// No `runtime` export: Cache Components requires the Node.js runtime, and this
+// image is now generated once at build time instead of on every request.
 
-export const alt = "Taxi Rijnvallei - Taxiservice Ede en omgeving"
+export const alt = "Taxi Rijnvallei - Taxiservice Ede, Wageningen en omgeving"
 export const size = {
   width: 1200,
   height: 630,
 }
 export const contentType = "image/png"
 
-export default async function Image() {
+export default function Image() {
   return new ImageResponse(
     (
       <div
@@ -33,19 +36,11 @@ export default async function Image() {
             width: "120px",
             height: "120px",
             borderRadius: "60px",
-            background: "#f59e0b",
+            background: "#fbbf24",
             marginBottom: "40px",
           }}
         >
-          <span
-            style={{
-              fontSize: "48px",
-              fontWeight: "bold",
-              color: "#1a1a2e",
-            }}
-          >
-            TR
-          </span>
+          <SteeringWheelIcon width="80" height="80" stroke="#171717" strokeWidth={2.25} />
         </div>
 
         {/* Title */}
@@ -70,7 +65,7 @@ export default async function Image() {
             textAlign: "center",
           }}
         >
-          Taxiservice Ede en omgeving
+          Taxiservice Ede, Wageningen en omgeving
         </p>
 
         {/* Features */}
@@ -90,7 +85,9 @@ export default async function Image() {
               fontSize: "24px",
             }}
           >
-            <span>✓</span>
+            <svg width="28" height="28" viewBox="0 0 24 24">
+              <path d="M20 6 9 17l-5-5" fill="none" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
             <span style={{ color: "#ffffff" }}>24/7 bereikbaar</span>
           </div>
           <div
@@ -102,7 +99,9 @@ export default async function Image() {
               fontSize: "24px",
             }}
           >
-            <span>✓</span>
+            <svg width="28" height="28" viewBox="0 0 24 24">
+              <path d="M20 6 9 17l-5-5" fill="none" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
             <span style={{ color: "#ffffff" }}>Vaste tarieven</span>
           </div>
           <div
@@ -114,7 +113,9 @@ export default async function Image() {
               fontSize: "24px",
             }}
           >
-            <span>✓</span>
+            <svg width="28" height="28" viewBox="0 0 24 24">
+              <path d="M20 6 9 17l-5-5" fill="none" stroke="#f59e0b" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
             <span style={{ color: "#ffffff" }}>Luchthavenvervoer</span>
           </div>
         </div>
@@ -137,7 +138,7 @@ export default async function Image() {
               color: "#1a1a2e",
             }}
           >
-            Bel 0317-844466
+            Bel {SITE.phone.display}
           </span>
         </div>
       </div>

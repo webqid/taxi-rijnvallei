@@ -1,217 +1,138 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
+import { SITE } from '../lib/config/site'
+
+/**
+ * The contact form posts straight to Web3Forms, which e-mails the taxi company.
+ * Every test answers that request locally, so running the suite never sends a
+ * real e-mail. The captured form fields are returned for assertions.
+ */
+async function mockWeb3Forms(page: Page) {
+  const submissions: Record<string, string>[] = []
+  await page.route('https://api.web3forms.com/submit', async (route) => {
+    const body = route.request().postDataBuffer()
+    const contentType = route.request().headers()['content-type'] ?? ''
+    const form = await new Response(body ? new Uint8Array(body) : null, {
+      headers: { 'content-type': contentType },
+    }).formData()
+    submissions.push(Object.fromEntries([...form.entries()].map(([key, value]) => [key, String(value)])))
+    await route.fulfill({ json: { success: true, message: 'Email sent successfully!' } })
+  })
+  return submissions
+}
+
+function localDateTime(daysAhead: number, hours: number) {
+  const date = new Date()
+  date.setDate(date.getDate() + daysAhead)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(hours)}:00`
+}
+
+async function selectLocation(page: Page, label: string, query: string) {
+  await page.getByRole('combobox', { name: label }).fill(query)
+  await page.getByRole('listbox', { name: `${label} suggesties` }).getByRole('option').first().click()
+}
 
 test.describe('Contact Form', () => {
   test.describe('Without reservation', () => {
-    test.beforeEach(async ({ page }) => {
-      await page.goto('/')
-      // Wait for page to load and scroll to contact section
-      await page.waitForLoadState('networkidle')
-    })
-
     test('should submit contact form with basic info', async ({ page }) => {
-      // Get the contact section (the one with "Contact & Reservering")
-      const contactSection = page.locator('#contact').filter({ hasText: 'Contact & Reservering' })
+      const submissions = await mockWeb3Forms(page)
+      await page.goto('/')
+      const contactSection = page.locator('#contact')
       await contactSection.scrollIntoViewIfNeeded()
-      await page.waitForTimeout(500)
-      
-      // Fill in the form using id selectors (unique to our contact section)
+
       await page.locator('#contact-name').fill('Jan de Tester')
       await page.locator('#contact-phone').fill('0612345678')
       await page.locator('#contact-email').fill('jan@test.nl')
       await contactSection.getByPlaceholder('Waar kunnen wij u mee helpen?').fill('Dit is een testbericht')
+      await contactSection.getByRole('button', { name: /Verstuur aanvraag/i }).click()
 
-      // Submit the form
-      const submitButton = contactSection.getByRole('button', { name: /Verstuur aanvraag/i })
-      await expect(submitButton).toBeEnabled()
-      await submitButton.click()
-
-      // Wait for success message
       await expect(page.getByText('Bedankt voor uw aanvraag!')).toBeVisible({ timeout: 10000 })
       await expect(page.getByText('Wij nemen zo snel mogelijk contact met u op')).toBeVisible()
+      expect(submissions).toHaveLength(1)
+      expect(submissions[0]).toMatchObject({
+        name: 'Jan de Tester',
+        phone: '0612345678',
+        email: 'jan@test.nl',
+        message: 'Dit is een testbericht',
+      })
+      expect(submissions[0].subject).toContain('Jan de Tester')
     })
 
-    test('should show validation for required fields', async ({ page }) => {
-      const contactSection = page.locator('#contact').filter({ hasText: 'Contact & Reservering' })
-      await contactSection.scrollIntoViewIfNeeded()
-      await page.waitForTimeout(500)
-      
-      // The name input should be required - clicking submit should not work
-      const submitButton = contactSection.getByRole('button', { name: /Verstuur aanvraag/i })
-      await submitButton.click()
+    test('should not submit without the required fields', async ({ page }) => {
+      const submissions = await mockWeb3Forms(page)
+      await page.goto('/')
+      await page.locator('#contact').getByRole('button', { name: /Verstuur aanvraag/i }).click()
 
-      // Form should not submit (no success message)
       await expect(page.getByText('Bedankt voor uw aanvraag!')).not.toBeVisible()
+      expect(submissions).toHaveLength(0)
     })
 
-    test('should show error for invalid email', async ({ page }) => {
-      const contactSection = page.locator('#contact').filter({ hasText: 'Contact & Reservering' })
-      await contactSection.scrollIntoViewIfNeeded()
-      await page.waitForTimeout(500)
-      
+    test('should not submit with an invalid email', async ({ page }) => {
+      const submissions = await mockWeb3Forms(page)
+      await page.goto('/')
       await page.locator('#contact-name').fill('Jan de Tester')
       await page.locator('#contact-phone').fill('0612345678')
       await page.locator('#contact-email').fill('invalid-email')
+      await page.locator('#contact').getByRole('button', { name: /Verstuur aanvraag/i }).click()
 
-      const submitButton = contactSection.getByRole('button', { name: /Verstuur aanvraag/i })
-      await submitButton.click()
-
-      // The form should not submit due to invalid email
       await expect(page.getByText('Bedankt voor uw aanvraag!')).not.toBeVisible()
+      expect(submissions).toHaveLength(0)
     })
   })
 
   test.describe('With reservation', () => {
-    async function fillBookingForm(page: import('@playwright/test').Page, options?: { withReturn?: boolean }) {
-      // Fill origin - use a simple location
-      const originInput = page.getByLabel('Ophaaladres')
-      await originInput.click()
-      await originInput.fill('Wageningen')
-      
-      // Wait for suggestions dropdown
-      const listbox = page.locator('[role="listbox"]')
-      await expect(listbox).toBeVisible({ timeout: 15000 })
-      
-      // Click the first suggestion
-      const firstOption = listbox.locator('[role="option"]').first()
-      await expect(firstOption).toBeVisible({ timeout: 5000 })
-      await firstOption.click()
-      
-      // Wait for the selection to register
-      await page.waitForTimeout(500)
+    test.skip(!SITE.features.priceCalculator, 'The price calculator is hidden (SITE.features.priceCalculator)')
 
-      // Fill destination
-      const destinationInput = page.getByLabel('Bestemming')
-      await destinationInput.click()
-      await destinationInput.fill('Ede')
-      
-      // Wait for suggestions dropdown
-      await expect(listbox).toBeVisible({ timeout: 15000 })
-      
-      // Click the first suggestion
-      const destOption = listbox.locator('[role="option"]').first()
-      await expect(destOption).toBeVisible({ timeout: 5000 })
-      await destOption.click()
-      
-      await page.waitForTimeout(500)
-
-      // Fill pickup datetime
-      const pickupInput = page.locator('input[type="datetime-local"]').first()
-      const tomorrow = new Date()
-      tomorrow.setDate(tomorrow.getDate() + 1)
-      tomorrow.setHours(14, 0, 0, 0)
-      const dateValue = tomorrow.toISOString().slice(0, 16)
-      await pickupInput.fill(dateValue)
+    async function calculateAndReserve(page: Page, options?: { withReturn?: boolean }) {
+      await page.goto('/bereken')
+      await selectLocation(page, 'Ophaaladres', 'Wageningen')
+      await selectLocation(page, 'Bestemming', 'Ede')
+      await page.locator('#pickupAt').fill(localDateTime(1, 14))
 
       if (options?.withReturn) {
-        // Enable return
         await page.getByLabel(/Retour gewenst/i).check()
-
-        // Fill return datetime
-        const returnInput = page.getByLabel('Retourdatum en -tijd')
-        const returnDate = new Date()
-        returnDate.setDate(returnDate.getDate() + 7)
-        returnDate.setHours(20, 0, 0, 0)
-        const returnValue = returnDate.toISOString().slice(0, 16)
-        await returnInput.fill(returnValue)
+        await page.getByLabel('Retourdatum en -tijd').fill(localDateTime(7, 20))
       }
+
+      await page.getByRole('button', { name: /Bereken mijn ritprijs/i }).click()
+      await expect(page.getByText('Uw offerte')).toBeVisible({ timeout: 30000 })
+      await page.getByRole('button', { name: /^Reserveren/ }).click()
+      await expect(page.getByText('Uw berekende rit')).toBeVisible()
     }
 
     test('should submit contact form with booking data', async ({ page }) => {
-      // Start on the booking page
-      await page.goto('/bereken')
-      await page.waitForLoadState('networkidle')
+      const submissions = await mockWeb3Forms(page)
+      await calculateAndReserve(page)
 
-      await fillBookingForm(page)
-
-      // Calculate quote
-      const calculateButton = page.getByRole('button', { name: /Bereken mijn ritprijs/i })
-      await expect(calculateButton).toBeEnabled({ timeout: 15000 })
-      await calculateButton.click()
-
-      // Wait for quote to appear
-      await expect(page.getByText('Uw offerte')).toBeVisible({ timeout: 30000 })
-
-      // Click reserve button
-      const reserveButton = page.getByRole('button', { name: /Reserveren/i })
-      await expect(reserveButton).toBeVisible()
-      await reserveButton.click()
-
-      // Wait for scroll to contact section
-      await page.waitForTimeout(1500)
-
-      // Verify booking summary is visible
-      await expect(page.getByText('Uw berekende rit')).toBeVisible()
-
-      // Fill contact form using id selectors
       await page.locator('#contact-name').fill('Jan de Tester')
       await page.locator('#contact-phone').fill('0612345678')
       await page.locator('#contact-email').fill('jan@test.nl')
       await page.getByPlaceholder('Eventuele bijzonderheden').fill('Graag op tijd')
+      await page.getByRole('button', { name: /Reservering aanvragen/i }).click()
 
-      // Submit - should say "Reservering aanvragen" when booking data is present
-      const submitButton = page.getByRole('button', { name: /Reservering aanvragen/i })
-      await expect(submitButton).toBeVisible()
-      await submitButton.click()
-
-      // Wait for success message
       await expect(page.getByText('Bedankt voor uw aanvraag!')).toBeVisible({ timeout: 10000 })
+      expect(submissions).toHaveLength(1)
+      expect(submissions[0].subject).toBe('Nieuwe reservering van Jan de Tester')
+      expect(submissions[0].Van).toContain('Wageningen')
+      expect(submissions[0].Ophalen).toBeTruthy()
+      expect(submissions[0].Prijs).toMatch(/€/)
     })
 
     test('should show booking summary with return trip', async ({ page }) => {
-      await page.goto('/bereken')
-      await page.waitForLoadState('networkidle')
+      await mockWeb3Forms(page)
+      await calculateAndReserve(page, { withReturn: true })
 
-      await fillBookingForm(page, { withReturn: true })
-
-      // Calculate quote
-      const calculateButton = page.getByRole('button', { name: /Bereken mijn ritprijs/i })
-      await expect(calculateButton).toBeEnabled({ timeout: 15000 })
-      await calculateButton.click()
-
-      // Wait for quote to appear
-      await expect(page.getByText('Uw offerte')).toBeVisible({ timeout: 30000 })
-
-      // Click reserve button
-      const reserveButton = page.getByRole('button', { name: /Reserveren/i })
-      await reserveButton.click()
-
-      // Wait for scroll to contact section
-      await page.waitForTimeout(1500)
-
-      // Verify booking summary shows both dates - use exact text match
-      await expect(page.getByText('Uw berekende rit')).toBeVisible()
       await expect(page.getByText('Heenreis', { exact: true })).toBeVisible()
       await expect(page.getByText('Retour', { exact: true }).first()).toBeVisible()
     })
 
     test('should allow clearing booking data', async ({ page }) => {
-      await page.goto('/bereken')
-      await page.waitForLoadState('networkidle')
+      await mockWeb3Forms(page)
+      await calculateAndReserve(page)
 
-      await fillBookingForm(page)
-
-      // Calculate quote
-      const calculateButton = page.getByRole('button', { name: /Bereken mijn ritprijs/i })
-      await expect(calculateButton).toBeEnabled({ timeout: 15000 })
-      await calculateButton.click()
-
-      // Wait for quote
-      await expect(page.getByText('Uw offerte')).toBeVisible({ timeout: 30000 })
-
-      // Click reserve
-      await page.getByRole('button', { name: /Reserveren/i }).click()
-      await page.waitForTimeout(1500)
-
-      // Verify booking summary is visible
-      await expect(page.getByText('Uw berekende rit')).toBeVisible()
-
-      // Click "Andere rit berekenen" to clear
       await page.getByRole('button', { name: /Andere rit berekenen/i }).click()
 
-      // Verify booking summary is gone
       await expect(page.getByText('Uw berekende rit')).not.toBeVisible()
-      
-      // The submit button should say "Verstuur aanvraag" instead of "Reservering aanvragen"
       await expect(page.getByRole('button', { name: /Verstuur aanvraag/i })).toBeVisible()
     })
   })

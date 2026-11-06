@@ -1,142 +1,112 @@
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
+import { SITE } from '../lib/config/site'
+
+// These tests use the real geocoding (Nominatim) and routing (OSRM) services
+// through our API routes, so they need an internet connection.
+
+function localDateTime(daysAhead: number, hours: number) {
+  const date = new Date()
+  date.setDate(date.getDate() + daysAhead)
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(hours)}:00`
+}
+
+async function selectLocation(page: Page, label: string, query: string) {
+  const input = page.getByRole('combobox', { name: label })
+  await input.fill(query)
+  await page.getByRole('listbox', { name: `${label} suggesties` }).getByRole('option').first().click()
+  return input
+}
 
 test.describe('Booking Widget', () => {
+  test.skip(!SITE.features.priceCalculator, 'The price calculator is hidden (SITE.features.priceCalculator)')
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/bereken')
   })
 
   test('should compute quote with origin and destination', async ({ page }) => {
-    // Fill origin
-    const originInput = page.getByLabel('Ophaaladres')
-    await originInput.fill('Wageningen')
-    
-    // Wait for suggestions and select first one
-    await page.waitForSelector('[role="listbox"]')
-    await page.keyboard.press('ArrowDown')
-    await page.keyboard.press('Enter')
+    await selectLocation(page, 'Ophaaladres', 'Wageningen')
+    await selectLocation(page, 'Bestemming', 'Ede')
+    await page.locator('#pickupAt').fill(localDateTime(1, 14))
 
-    // Fill destination
-    const destinationInput = page.getByLabel('Bestemming')
-    await destinationInput.fill('Ede')
-    
-    // Wait for suggestions and select first one
-    await page.waitForSelector('[role="listbox"]')
-    await page.keyboard.press('ArrowDown')
-    await page.keyboard.press('Enter')
-
-    // Fill pickup datetime (use a date in the future)
-    const pickupInput = page.locator('input[type="datetime-local"]').first()
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    tomorrow.setHours(14, 0, 0, 0)
-    const dateValue = tomorrow.toISOString().slice(0, 16)
-    await pickupInput.fill(dateValue)
-
-    // Submit form
     const submitButton = page.getByRole('button', { name: /Bereken mijn ritprijs/i })
     await expect(submitButton).toBeEnabled()
     await submitButton.click()
 
-    // Wait for loading to finish
-    await expect(submitButton).not.toContainText('Berekenen...')
-
-    // Verify quote result is shown
-    await expect(page.getByText('Uw offerte')).toBeVisible()
-    await expect(page.getByText('Afstand')).toBeVisible()
+    await expect(page.getByText('Uw offerte')).toBeVisible({ timeout: 30000 })
+    await expect(page.getByText('Afstand', { exact: true })).toBeVisible()
     await expect(page.getByText('Geschatte rijtijd')).toBeVisible()
     await expect(page.getByText('Prijsopbouw')).toBeVisible()
     await expect(page.getByText('Totaal')).toBeVisible()
+    await expect(page.getByText('Prijsindicatie op basis van het taximetertarief')).toBeVisible()
+  })
+
+  test('should show the fixed fare for a ride to Schiphol', async ({ page }) => {
+    await selectLocation(page, 'Ophaaladres', 'Dorpsstraat Bennekom')
+    await page.getByRole('button', { name: 'Schiphol', exact: true }).click()
+    await expect(page.getByRole('combobox', { name: 'Bestemming' })).toHaveValue('Schiphol')
+    await page.locator('#pickupAt').fill(localDateTime(3, 10))
+
+    await page.getByRole('button', { name: /Bereken mijn ritprijs/i }).click()
+
+    await expect(page.getByText('Uw offerte')).toBeVisible({ timeout: 30000 })
+    await expect(page.getByText('Vaste prijs', { exact: true })).toBeVisible()
+    await expect(page.getByText('Vaste prijs Bennekom → Schiphol')).toBeVisible()
+    await expect(page.getByText('€ 150,00').first()).toBeVisible()
   })
 
   test('should add stopover and swap, then compute quote', async ({ page }) => {
-    // Fill origin
-    const originInput = page.getByLabel('Ophaaladres')
-    await originInput.fill('Wageningen')
-    await page.waitForSelector('[role="listbox"]')
-    await page.keyboard.press('ArrowDown')
-    await page.keyboard.press('Enter')
+    const originInput = await selectLocation(page, 'Ophaaladres', 'Wageningen')
+    const destinationInput = await selectLocation(page, 'Bestemming', 'Veenendaal')
 
-    // Fill destination
-    const destinationInput = page.getByLabel('Bestemming')
-    await destinationInput.fill('Veenendaal')
-    await page.waitForSelector('[role="listbox"]')
-    await page.keyboard.press('ArrowDown')
-    await page.keyboard.press('Enter')
-
-    // Add a stopover
     await page.getByRole('button', { name: /Tussenstop toevoegen/i }).click()
-    
-    // Fill stopover
-    const stopoverInput = page.getByLabel('Tussenstop 1')
-    await stopoverInput.fill('Ede')
-    await page.waitForSelector('[role="listbox"]')
-    await page.keyboard.press('ArrowDown')
-    await page.keyboard.press('Enter')
+    await selectLocation(page, 'Tussenstop 1', 'Ede')
 
-    // Get current origin and destination values
     const originValue = await originInput.inputValue()
     const destinationValue = await destinationInput.inputValue()
-
-    // Swap origin and destination
     await page.getByRole('button', { name: /Wissel vertrek- en aankomstlocatie/i }).click()
-
-    // Verify swap happened
     await expect(originInput).toHaveValue(destinationValue)
     await expect(destinationInput).toHaveValue(originValue)
 
-    // Fill pickup datetime
-    const pickupInput = page.locator('input[type="datetime-local"]').first()
-    const tomorrow = new Date()
-    tomorrow.setDate(tomorrow.getDate() + 1)
-    tomorrow.setHours(10, 0, 0, 0)
-    const dateValue = tomorrow.toISOString().slice(0, 16)
-    await pickupInput.fill(dateValue)
-
-    // Submit form
+    await page.locator('#pickupAt').fill(localDateTime(1, 10))
     const submitButton = page.getByRole('button', { name: /Bereken mijn ritprijs/i })
     await expect(submitButton).toBeEnabled()
     await submitButton.click()
 
-    // Wait for loading to finish
-    await expect(submitButton).not.toContainText('Berekenen...')
-
-    // Verify quote result is shown
-    await expect(page.getByText('Uw offerte')).toBeVisible()
+    await expect(page.getByText('Uw offerte')).toBeVisible({ timeout: 30000 })
     await expect(page.getByText('Totaal')).toBeVisible()
   })
 
-  test('should show return trip options when return toggle is enabled', async ({ page }) => {
-    // Enable return toggle
-    await page.getByLabel(/Retour gewenst/i).check()
+  test('should keep the typed text when editing a selected address', async ({ page }) => {
+    const originInput = await selectLocation(page, 'Ophaaladres', 'Wageningen')
+    const selected = await originInput.inputValue()
+    await originInput.press('End')
+    await originInput.pressSequentially(' 1')
+    await expect(originInput).toHaveValue(`${selected} 1`)
+  })
 
-    // Verify return datetime input is visible
+  test('should show return trip options when return toggle is enabled', async ({ page }) => {
+    await page.getByLabel(/Retour gewenst/i).check()
     await expect(page.getByLabel('Retourdatum en -tijd')).toBeVisible()
   })
 
   test('should update passenger count with stepper', async ({ page }) => {
-    // Check initial value
-    await expect(page.getByText('2').first()).toBeVisible()
-
-    // Increase passengers
+    const count = page.locator('[aria-live="polite"]').filter({ hasText: /^\d$/ })
+    await expect(count).toHaveText('2')
     await page.getByRole('button', { name: /Verhoog aantal passagiers/i }).click()
-    await expect(page.locator('[aria-live="polite"]')).toContainText('3')
-
-    // Decrease passengers
+    await expect(count).toHaveText('3')
     await page.getByRole('button', { name: /Verminder aantal passagiers/i }).click()
-    await expect(page.locator('[aria-live="polite"]')).toContainText('2')
+    await expect(count).toHaveText('2')
   })
 
   test('should toggle luggage option', async ({ page }) => {
-    // Select "Yes, I have luggage"
     await page.getByText('Ja, ik heb bagage').click()
-    
-    // Verify it's selected (by checking the visual indicator)
     const yesOption = page.getByText('Ja, ik heb bagage').locator('..')
     await expect(yesOption).toHaveClass(/border-primary/)
   })
 
   test('submit button should be disabled when form is incomplete', async ({ page }) => {
-    const submitButton = page.getByRole('button', { name: /Bereken mijn ritprijs/i })
-    await expect(submitButton).toBeDisabled()
+    await expect(page.getByRole('button', { name: /Bereken mijn ritprijs/i })).toBeDisabled()
   })
 })

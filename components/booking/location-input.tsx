@@ -30,6 +30,10 @@ export function LocationInput({
   const [inputValue, setInputValue] = React.useState(value?.label ?? '')
   const [isOpen, setIsOpen] = React.useState(false)
   const [highlightedIndex, setHighlightedIndex] = React.useState(-1)
+  // Tracks the value the input text was last synced with, and whether the
+  // selection was cleared because the visitor started typing.
+  const [syncedLabel, setSyncedLabel] = React.useState(value?.label)
+  const [clearedByTyping, setClearedByTyping] = React.useState(false)
   const inputRef = React.useRef<HTMLInputElement>(null)
   const listboxRef = React.useRef<HTMLUListElement>(null)
   const containerRef = React.useRef<HTMLDivElement>(null)
@@ -40,13 +44,22 @@ export function LocationInput({
     enabled: isOpen && !value,
   })
 
-  // Sync input with external value changes
-  React.useEffect(() => {
-    if (value?.label !== inputValue) {
-      setInputValue(value?.label ?? '')
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value?.label])
+  // Sync the text with external changes (selection, swap, reset), adjusting
+  // state during render: https://react.dev/learn/you-might-not-need-an-effect
+  if (value?.label !== syncedLabel) {
+    setSyncedLabel(value?.label)
+    // Keep what the visitor is typing; only an external reset empties the field.
+    if (value) setInputValue(value.label)
+    else if (!clearedByTyping) setInputValue('')
+    setClearedByTyping(false)
+  }
+
+  // Reset the highlighted option when new suggestions arrive.
+  const [prevSuggestions, setPrevSuggestions] = React.useState(suggestions)
+  if (suggestions !== prevSuggestions) {
+    setPrevSuggestions(suggestions)
+    setHighlightedIndex(-1)
+  }
 
   // Close dropdown when clicking outside
   React.useEffect(() => {
@@ -60,11 +73,6 @@ export function LocationInput({
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  // Reset highlight when suggestions change
-  React.useEffect(() => {
-    setHighlightedIndex(-1)
-  }, [suggestions])
-
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value
     setInputValue(newValue)
@@ -72,6 +80,7 @@ export function LocationInput({
 
     // Clear selected location when user types
     if (value) {
+      setClearedByTyping(true)
       onChange(null)
     }
   }
@@ -81,6 +90,7 @@ export function LocationInput({
       label: suggestion.label,
       lat: suggestion.lat,
       lon: suggestion.lon,
+      city: suggestion.city,
     }
     onChange(location)
     setInputValue(suggestion.label)

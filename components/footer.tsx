@@ -1,93 +1,130 @@
-import { MapPin, Phone, Mail, Clock, MessageCircle } from "lucide-react"
+import Link from 'next/link'
+import { cacheLife } from 'next/cache'
+import { Clock, Mail, MessageCircle, Phone } from 'lucide-react'
+import { PhoneLink } from '@/components/contact-links'
+import { LogoMark } from '@/components/steering-wheel'
+import { LOCATIONS } from '@/lib/config/locations'
+import { SITE, whatsappHref } from '@/lib/config/site'
+
+/**
+ * `new Date()` would make every page render at request time. `use cache`
+ * captures the year in the static shell instead; the pages are refreshed in the
+ * background once a day, so the year changes shortly after New Year.
+ */
+async function CurrentYear() {
+  'use cache'
+  cacheLife({ revalidate: 60 * 60 * 24, expire: 60 * 60 * 24 * 365 })
+  return new Date().getFullYear()
+}
+
+const SERVICE_LINKS = [
+  { href: '/taxi-schiphol', label: 'Taxi naar Schiphol' },
+  { href: '/zakelijk-vervoer', label: 'Zakelijk vervoer' },
+  ...(SITE.features.priceCalculator ? [{ href: '/bereken', label: 'Ritprijs berekenen' }] : []),
+  { href: '/tarieven', label: 'Tarieven' },
+] as const
 
 export default function Footer() {
   return (
-    <footer className="bg-foreground text-background py-16">
+    <footer className="bg-foreground py-16 text-background">
       <div className="container mx-auto px-4">
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+        <div className="mb-12 grid gap-10 md:grid-cols-2 lg:grid-cols-4">
           <div>
-            <div className="flex items-center space-x-2 mb-6">
-              <div className="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
-                <svg viewBox="0 0 24 24" className="w-5 h-5 text-primary-foreground" fill="none" stroke="currentColor" strokeWidth="2">
-                  <circle cx="12" cy="12" r="9" />
-                  <circle cx="12" cy="12" r="3" />
-                  <line x1="12" y1="3" x2="12" y2="9" />
-                  <line x1="12" y1="15" x2="12" y2="21" />
-                  <line x1="3" y1="12" x2="9" y2="12" />
-                  <line x1="15" y1="12" x2="21" y2="12" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold">Taxi Rijnvallei</h3>
+            <div className="mb-6 flex items-center gap-3">
+              <LogoMark />
+              <p className="text-xl font-bold">{SITE.name}</p>
             </div>
-            <div className="text-background/80 space-y-1 mb-3">
-              <p>Grootveld 27</p>
-              <p>6715EX Ede</p>
-            </div>
-            <div className="text-background/80 space-y-1">
-              <p>Beekstraat 13</p>
-              <p>6707 DR Wageningen</p>
-              <p className="text-sm mt-3">KvK 65497759</p>
-            </div>
+            {SITE.addresses.map((address) => (
+              <address key={address.addressLocality} className="mb-3 not-italic text-background/80">
+                {address.streetAddress}
+                <br />
+                {address.postalCode} {address.addressLocality}
+              </address>
+            ))}
+            <p className="text-sm text-background/80">KvK {SITE.kvk}</p>
           </div>
 
           <div>
-            <h4 className="font-semibold mb-4">Contact</h4>
-            <div className="space-y-3 text-background/80">
-              <div className="flex items-center space-x-2">
-                <Phone className="w-4 h-4" />
-                <a href="tel:+31317844466" className="hover:text-background transition-colors">0317-844466</a>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Phone className="w-4 h-4" />
-                <a href="tel:+31647145342" className="hover:text-background transition-colors">06-47145342</a>
-              </div>
-              <div className="flex items-center space-x-2">
-                <MessageCircle className="w-4 h-4" />
-                <a href="https://wa.me/31647145342" target="_blank" rel="noopener noreferrer" className="hover:text-background transition-colors">WhatsApp</a>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Mail className="w-4 h-4" />
-                <a href="mailto:info@taxirijnvallei.nl" className="hover:text-background transition-colors">info@taxirijnvallei.nl</a>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h4 className="font-semibold mb-4">Diensten</h4>
-            <ul className="space-y-2 text-background/80">
-              <li>Particulier vervoer</li>
-              <li>Zakelijk vervoer</li>
-              <li>Luchthavenvervoer</li>
-              <li>Stationsvervoer</li>
-              <li>Ziekenhuisvervoer</li>
+            <h2 className="mb-4 font-semibold">Contact</h2>
+            <ul className="space-y-3 text-background/80">
+              <li className="flex items-center gap-2">
+                <Phone className="size-4" aria-hidden="true" />
+                <PhoneLink cta="footer" className="transition-colors hover:text-background" />
+              </li>
+              <li className="flex items-center gap-2">
+                <Phone className="size-4" aria-hidden="true" />
+                <PhoneLink cta="footer-mobile" number="mobile" className="transition-colors hover:text-background" />
+              </li>
+              <li className="flex items-center gap-2">
+                <MessageCircle className="size-4" aria-hidden="true" />
+                <a
+                  href={whatsappHref()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  data-cta="whatsapp-footer"
+                  className="transition-colors hover:text-background"
+                >
+                  WhatsApp
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Mail className="size-4" aria-hidden="true" />
+                <a href={`mailto:${SITE.email}`} className="transition-colors hover:text-background">
+                  {SITE.email}
+                </a>
+              </li>
+              <li className="flex items-center gap-2">
+                <Clock className="size-4" aria-hidden="true" />
+                <span>24/7 bereikbaar</span>
+              </li>
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-semibold mb-4">Bereikbaarheid</h4>
-            <div className="space-y-2 text-background/80">
-              <div className="flex items-center space-x-2">
-                <Clock className="w-4 h-4" />
-                <span>24/7 bereikbaar</span>
-              </div>
-              <p className="text-sm">Telefoon en WhatsApp</p>
-            </div>
-          </div>
+          <nav aria-label="Werkgebied">
+            <h2 className="mb-4 font-semibold">Werkgebied</h2>
+            <ul className="space-y-2 text-background/80">
+              {LOCATIONS.map((location) => (
+                <li key={location.slug}>
+                  <Link href={`/${location.slug}`} className="transition-colors hover:text-background">
+                    Taxi {location.name}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          <nav aria-label="Diensten">
+            <h2 className="mb-4 font-semibold">Diensten</h2>
+            <ul className="space-y-2 text-background/80">
+              {SERVICE_LINKS.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="transition-colors hover:text-background">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+              <li>
+                {/* /review is a route handler that redirects to Google, not a page. */}
+                {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
+                <a href="/review" className="transition-colors hover:text-background">
+                  Schrijf een review
+                </a>
+              </li>
+            </ul>
+          </nav>
         </div>
 
-        <div className="border-t border-background/20 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <div className="text-background/60 text-sm">
-              <p>© {new Date().getFullYear()} Taxi Rijnvallei. Alle rechten voorbehouden.</p>
-            </div>
-            <div className="flex space-x-6 text-sm text-background/60">
-              <a href="#" className="hover:text-background transition-colors">
-                Privacybeleid
-              </a>
-              <a href="#" className="hover:text-background transition-colors">
-                Algemene voorwaarden
-              </a>
-            </div>
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-background/20 pt-8 text-sm text-background/60 md:flex-row">
+          <p>
+            © <CurrentYear /> {SITE.name}. Alle rechten voorbehouden.
+          </p>
+          <div className="flex gap-6">
+            <a href="#" className="transition-colors hover:text-background">
+              Privacybeleid
+            </a>
+            <a href="#" className="transition-colors hover:text-background">
+              Algemene voorwaarden
+            </a>
           </div>
         </div>
       </div>

@@ -1,199 +1,124 @@
-import { Plane, Clock, CheckCircle, Euro, Phone, MapPin, Briefcase, Smile } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-import Image from "next/image"
-
-const airports = [
-  { name: "Schiphol", wegbrengen: 150, ophalen: 160 },
-  { name: "Eindhoven Airport", enkeleReis: 150 },
-  { name: "Rotterdam Airport", enkeleReis: 160 },
-  { name: "Weeze Airport", enkeleReis: 150 },
-  { name: "Brussels Airport", wegbrengen: 260, ophalen: 280 },
-  { name: "Maastricht Aachen Airport", wegbrengen: 260, ophalen: 280 },
-]
+import Link from 'next/link'
+import { ArrowRight, Briefcase, CheckCircle, Clock, Euro, MapPin, Plane, Smile } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { AirportFareTable } from '@/components/airport-fares'
+import { PhoneLink } from '@/components/contact-links'
+import { SectionHeading } from '@/components/section-heading'
+import { AIRPORT_WAITING, formatPlaceList, getFareRegion } from '@/lib/config/airport-fares'
+import { formatPrice } from '@/lib/services/pricing'
 
 const benefits = [
-  "Vaste tarieven per regio",
-  "45 minuten gratis wachttijd bij ophalen",
-  "Geen extra kosten bij vertraagde vlucht",
-  "Wachttijd daarna: €13,84 per 15 minuten",
+  'Vaste prijs per regio, vooraf bekend',
+  `${AIRPORT_WAITING.freeMinutes} minuten gratis wachttijd bij ophalen`,
+  'Geen extra kosten bij een vertraagde vlucht',
+  `Wachttijd daarna: ${formatPrice(AIRPORT_WAITING.per15MinutesCents)} per 15 minuten`,
 ]
 
-const pickupSteps = [
+export const PICKUP_STEPS = [
   {
-    step: 1,
-    title: "Telefoon aan na landing",
-    description: "Zet uw telefoon aan zodra u geland bent",
+    title: 'Telefoon aan na landing',
+    description: 'Zet uw telefoon aan zodra u geland bent.',
   },
   {
-    step: 2,
-    title: "Chauffeur belt u",
-    description: "Ongeveer 10 minuten na de landing belt de chauffeur u en geeft de precieze ophaallocatie aan",
+    title: 'Chauffeur belt u',
+    description:
+      'Ongeveer 10 minuten na de landing belt de chauffeur u en geeft de precieze ophaallocatie door.',
   },
   {
-    step: 3,
-    title: "Ophalen bij vertrekhal",
-    description: "Uw taxi haalt u op bij VERTREKHAL 1, 2 of 3 op de 2e verdieping (LET OP! Dus NIET bij de aankomsthallen!)",
+    title: 'Ophalen bij de vertrekhal',
+    description:
+      'Uw taxi haalt u op bij vertrekhal 1, 2 of 3 op de 2e verdieping. Let op: dus niet bij de aankomsthallen!',
   },
 ]
 
+export const AIRPORT_SERVICES = [
+  { icon: Clock, title: 'Altijd stipt op tijd', description: 'Uw taxi staat op tijd op het afgesproken adres.' },
+  { icon: Briefcase, title: 'Bagageservice', description: 'De chauffeur draagt uw bagage, ook van bovenverdiepingen.' },
+  { icon: Smile, title: 'Hulp bij instappen', description: 'Hulp nodig met in- en uitstappen? Wij helpen u graag.' },
+  { icon: MapPin, title: 'Juiste vertrekhal', description: 'Wij zetten u af bij de juiste vertrekhal.' },
+]
+
+export function PickupSteps() {
+  return (
+    <div>
+      <h3 className="mb-8 text-center text-2xl font-bold">Hoe vind ik mijn taxi bij aankomst op Schiphol?</h3>
+      <ol className="mx-auto grid max-w-4xl gap-6 md:grid-cols-3">
+        {PICKUP_STEPS.map((item, index) => (
+          <li key={item.title}>
+            <Card className="h-full border-0 text-center shadow-sm">
+              <CardContent className="p-6">
+                <div className="mx-auto mb-4 flex size-10 items-center justify-center rounded-full bg-primary font-bold text-primary-foreground">
+                  {index + 1}
+                </div>
+                <h4 className="mb-2 font-semibold">{item.title}</h4>
+                <p className="text-sm text-muted-foreground">{item.description}</p>
+              </CardContent>
+            </Card>
+          </li>
+        ))}
+      </ol>
+      <p className="mt-4 text-center text-sm text-muted-foreground">
+        Indien nodig bereikt u de chauffeur op{' '}
+        <PhoneLink cta="airport-driver" number="mobile" className="font-medium text-primary hover:underline" />
+      </p>
+    </div>
+  )
+}
+
+/** Airport fares and pickup service. The pickup steps and extras are on /taxi-schiphol. */
 export default function AirportSection() {
+  const region = getFareRegion('rijnvallei')
+
   return (
     <section id="airport" className="py-20">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-4">
-            <Plane className="w-7 h-7 text-primary" />
-          </div>
-          <h2 className="text-3xl lg:text-4xl font-bold mb-4 text-balance">Luchthavenvervoer</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Ontspannen naar de luchthaven of weer thuis. Wij zorgen dat u op tijd bent, zonder stress.
-          </p>
+        <div className="mx-auto mb-4 flex size-14 items-center justify-center rounded-xl bg-primary/10">
+          <Plane className="size-7 text-primary" aria-hidden="true" />
         </div>
+        <SectionHeading
+          title="Luchthavenvervoer voor een vaste prijs"
+          description="Ontspannen naar de luchthaven of weer thuis. Wij zorgen dat u op tijd bent, zonder stress."
+        />
 
-        <div className="grid lg:grid-cols-2 gap-12 items-start">
+        <div className="mx-auto grid max-w-5xl items-start gap-10 lg:grid-cols-2">
           <div>
-            <div className="relative aspect-[4/3] mb-6 rounded-xl overflow-hidden">
-              <Image
-                src="/goedkope-schiphol-taxi-320x240.jpg"
-                alt="Schiphol taxi - ontspannen reizen naar de luchthaven"
-                fill
-                className="object-cover"
-              />
-            </div>
-            <h3 className="text-xl font-semibold mb-6">Tarieven vanaf Veenendaal, Ede, Bennekom en Wageningen</h3>
-            <div className="grid md:grid-cols-2 gap-3">
-              {airports.map((airport, index) => (
-                <Card key={index} className="border-0 shadow-sm">
-                  <CardContent className="p-4">
-                    <div className="flex items-center gap-3 mb-2">
-                      <Plane className="w-5 h-5 text-primary" />
-                      <span className="font-medium">{airport.name}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-muted-foreground ml-8">
-                      {airport.enkeleReis ? (
-                        <span>Enkele reis: <span className="text-foreground font-semibold">€{airport.enkeleReis}</span></span>
-                      ) : (
-                        <>
-                          <span>Wegbrengen: <span className="text-foreground font-semibold">€{airport.wegbrengen}</span></span>
-                          <span>Ophalen: <span className="text-foreground font-semibold">€{airport.ophalen}</span></span>
-                        </>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-            <p className="text-sm text-muted-foreground mt-4">
-              Prijzen zijn inclusief 9% btw en gelden voor 1–4 personen. Bekijk alle regio's en tarieven hieronder.
+            <h3 className="mb-4 text-xl font-semibold">Tarieven vanuit {formatPlaceList(region.places)}</h3>
+            <Card className="border-0 shadow-sm">
+              <CardContent className="p-4 sm:p-6">
+                <AirportFareTable regionId={region.id} />
+              </CardContent>
+            </Card>
+            <p className="mt-4 text-sm text-muted-foreground">
+              Prijzen inclusief 9% btw, voor 1–4 personen. Woont u elders?{' '}
+              <Link href="/taxi-schiphol" className="font-medium text-primary hover:underline">
+                Bekijk alle regio&apos;s
+              </Link>
+              .
             </p>
           </div>
 
           <div>
-            <h3 className="text-xl font-semibold mb-6">Ophaalservice luchthaven</h3>
-            <div className="space-y-4">
-              {benefits.map((benefit, index) => (
-                <div key={index} className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-primary mt-0.5 shrink-0" />
+            <h3 className="mb-6 text-xl font-semibold">Ophaalservice luchthaven</h3>
+            <ul className="space-y-4">
+              {benefits.map((benefit) => (
+                <li key={benefit} className="flex items-start gap-3">
+                  <CheckCircle className="mt-0.5 size-5 shrink-0 text-primary" aria-hidden="true" />
                   <span>{benefit}</span>
-                </div>
+                </li>
               ))}
-            </div>
-
-            <Card className="border-0 shadow-sm mt-8 bg-primary/5">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <Clock className="w-6 h-6 text-primary shrink-0" />
-                  <div>
-                    <h4 className="font-semibold mb-1">Gratis wachttijd</h4>
-                    <p className="text-muted-foreground text-sm">
-                      Bij het ophalen wachten wij 45 minuten gratis. Is uw vlucht vertraagd? Geen probleem, wij volgen uw vlucht en passen onze aankomsttijd aan. Geen extra kosten bij vertraging.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border-0 shadow-sm mt-4">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <Euro className="w-6 h-6 text-primary shrink-0" />
-                  <div>
-                    <h4 className="font-semibold mb-1">Grote taxi (5–8 personen)</h4>
-                    <p className="text-muted-foreground text-sm">
-                      Voor groepen tot 8 personen zijn afwijkende tarieven van toepassing. Neem contact op voor een offerte.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+            </ul>
+            <p className="mt-6 flex items-start gap-3 text-sm text-muted-foreground">
+              <Euro className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden="true" />
+              Groep van 5–8 personen? Daarvoor gelden afwijkende tarieven; vraag een offerte aan.
+            </p>
+            <Link
+              href="/taxi-schiphol"
+              className="mt-8 inline-flex items-center gap-1 font-semibold text-sky-700 hover:underline"
+            >
+              Alles over taxi naar Schiphol en ophalen op de luchthaven
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
           </div>
-        </div>
-
-        {/* Ophalen op Schiphol - Stappen */}
-        <div className="mt-16">
-          <h3 className="text-2xl font-bold text-center mb-8">Hoe vind ik mijn taxi bij aankomst op Schiphol?</h3>
-          <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            {pickupSteps.map((item) => (
-              <Card key={item.step} className="border-0 shadow-sm text-center">
-                <CardContent className="p-6">
-                  <div className="w-10 h-10 bg-primary text-primary-foreground rounded-full flex items-center justify-center mx-auto mb-4 font-bold">
-                    {item.step}
-                  </div>
-                  <h4 className="font-semibold mb-2">{item.title}</h4>
-                  <p className="text-sm text-muted-foreground">{item.description}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-          <p className="text-center text-sm text-muted-foreground mt-4">
-            Indien nodig kunt u de chauffeur bereiken op{" "}
-            <a href="tel:0647145342" className="text-primary font-medium hover:underline">
-              06-47 14 53 42
-            </a>
-          </p>
-        </div>
-
-        {/* Extra service informatie */}
-        <div className="mt-16 bg-muted/30 rounded-2xl p-8">
-          <h3 className="text-2xl font-bold text-center mb-4">
-            Altijd op tijd voor uw vlucht
-          </h3>
-          <p className="text-center text-muted-foreground max-w-3xl mx-auto mb-8">
-            Een ontspannen begin van uw vakantie of zakenreis
-          </p>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <div className="text-center">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <Clock className="w-6 h-6 text-primary" />
-              </div>
-              <h4 className="font-semibold mb-1">Altijd stipt op tijd</h4>
-              <p className="text-sm text-muted-foreground">Uw taxi is altijd op tijd op het afgesproken adres</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <Briefcase className="w-6 h-6 text-primary" />
-              </div>
-              <h4 className="font-semibold mb-1">Bagage service</h4>
-              <p className="text-sm text-muted-foreground">Chauffeur draagt uw bagage, ook van bovenverdiepingen</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <Smile className="w-6 h-6 text-primary" />
-              </div>
-              <h4 className="font-semibold mb-1">Hulp bij instappen</h4>
-              <p className="text-sm text-muted-foreground">Hulp nodig met in- en uitstappen? Wij helpen u graag</p>
-            </div>
-            <div className="text-center">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center mx-auto mb-3">
-                <MapPin className="w-6 h-6 text-primary" />
-              </div>
-              <h4 className="font-semibold mb-1">Juiste vertrekhal</h4>
-              <p className="text-sm text-muted-foreground">Wij zetten u af bij de juiste vertrekhal</p>
-            </div>
-          </div>
-          <p className="text-center text-muted-foreground mt-6 text-sm max-w-2xl mx-auto">
-            Onze taxi's zijn uitgerust met airconditioning. Onderweg kunt u heerlijk ontspannen of, als u op zakenreis gaat, aan uw zaken werken.
-          </p>
         </div>
       </div>
     </section>

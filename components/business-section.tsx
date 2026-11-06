@@ -1,26 +1,28 @@
-import { Building2, FileText, Users, GraduationCap } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
+import Link from 'next/link'
+import { ArrowRight, Building2, FileText, GraduationCap, Users } from 'lucide-react'
+import { Card, CardContent } from '@/components/ui/card'
+import { SectionHeading } from '@/components/section-heading'
 
-const businessServices = [
+export const BUSINESS_SERVICES = [
   {
     icon: Building2,
-    title: "Zakelijk vervoer",
-    description: "Professioneel vervoer voor bedrijven en instellingen. Facturatie achteraf mogelijk.",
+    title: 'Zakelijk vervoer',
+    description: 'Professioneel vervoer voor bedrijven en instellingen. Facturatie achteraf mogelijk.',
   },
   {
     icon: FileText,
-    title: "Facturatie op maat",
-    description: "Maandelijkse factuur met ritoverzicht. Geschikt voor bedrijven met regelmatig vervoer.",
+    title: 'Facturatie op maat',
+    description: 'Maandelijkse factuur met ritoverzicht. Geschikt voor bedrijven met regelmatig vervoer.',
   },
   {
     icon: GraduationCap,
-    title: "WUR vervoer",
-    description: "Vervoer van en naar Wageningen Universiteit. Voor medewerkers, gasten en studenten.",
+    title: 'WUR vervoer',
+    description: 'Vervoer van en naar Wageningen University & Research. Voor medewerkers, gasten en studenten.',
   },
   {
     icon: Users,
-    title: "Groepsvervoer",
-    description: "Grotere groepen tot 8 personen. Ideaal voor zakelijke bijeenkomsten en evenementen.",
+    title: 'Groepsvervoer',
+    description: 'Grotere groepen tot 8 personen. Ideaal voor zakelijke bijeenkomsten en evenementen.',
   },
 ]
 
@@ -28,35 +30,35 @@ export default function BusinessSection() {
   return (
     <section id="business" className="py-20">
       <div className="container mx-auto px-4">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl lg:text-4xl font-bold mb-4 text-balance">Zakelijk vervoer</h2>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto text-pretty">
-            Taxi Rijnvallei werkt samen met bedrijven en instellingen in de regio. Facturatie en vaste afspraken zijn mogelijk.
-          </p>
-        </div>
+        <SectionHeading
+          title="Zakelijk vervoer"
+          description="Taxi Rijnvallei werkt samen met bedrijven en instellingen in de regio. Facturatie en vaste afspraken zijn mogelijk."
+        />
 
-        <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-          {businessServices.map((service, index) => (
-            <Card key={index} className="border-0 shadow-sm">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <service.icon className="w-6 h-6 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold mb-2">{service.title}</h3>
-                    <p className="text-muted-foreground text-sm">{service.description}</p>
-                  </div>
+        <div className="mx-auto grid max-w-4xl gap-6 md:grid-cols-2">
+          {BUSINESS_SERVICES.map((service) => (
+            <Card key={service.title} className="border-0 shadow-sm">
+              <CardContent className="flex items-start gap-4 p-6">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  <service.icon className="size-6 text-primary" aria-hidden="true" />
+                </div>
+                <div>
+                  <h3 className="mb-2 font-semibold">{service.title}</h3>
+                  <p className="text-sm text-muted-foreground">{service.description}</p>
                 </div>
               </CardContent>
             </Card>
           ))}
         </div>
 
-        <div className="text-center mt-10">
-          <p className="text-muted-foreground">
-            Neem contact met ons op voor de mogelijkheden voor uw bedrijf of instelling.
-          </p>
+        <div className="mt-10 text-center">
+          <Link
+            href="/zakelijk-vervoer"
+            className="inline-flex items-center gap-1 font-semibold text-sky-700 hover:underline"
+          >
+            Meer over zakelijk vervoer en rijden op rekening
+            <ArrowRight className="size-4" aria-hidden="true" />
+          </Link>
         </div>
       </div>
     </section>

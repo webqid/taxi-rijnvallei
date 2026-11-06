@@ -3,6 +3,8 @@
 import { useQuery } from '@tanstack/react-query'
 import type { GeocodeSuggestion } from '@/lib/types/booking'
 
+const NO_SUGGESTIONS: GeocodeSuggestion[] = []
+
 interface UseGeocodeSuggestionsOptions {
   query: string
   enabled?: boolean
@@ -43,7 +45,7 @@ export function useGeocodeSuggestions({
   })
 
   return {
-    suggestions: data ?? [],
+    suggestions: data ?? NO_SUGGESTIONS,
     isLoading: shouldFetch && isLoading,
     error: error instanceof Error ? error.message : null,
   }

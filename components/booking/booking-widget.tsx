@@ -14,9 +14,10 @@ import { ReturnToggle } from './return-toggle'
 import { LuggageRadio } from './luggage-radio'
 import { PassengerStepper } from './passenger-stepper'
 import { QuoteResult } from './quote-result'
-import { QuoteSkeleton, MapSkeleton } from './quote-skeleton'
+import { QuoteSkeleton } from './quote-skeleton'
 import { useQuote } from '@/hooks/use-quote'
 import { useBookingContext } from '@/lib/context/booking-context'
+import { getAirport } from '@/lib/config/airport-fares'
 import type { Location, QuoteRequest } from '@/lib/types/booking'
 
 // Lazy-loaded map component (no SSR to avoid Leaflet window errors)
@@ -31,6 +32,15 @@ const RouteMapPreview = dynamic(
     ),
   }
 )
+
+/** One-click destinations. The address search does not always find airports by name. */
+const POPULAR_DESTINATIONS: Location[] = [
+  ...(['schiphol', 'eindhoven', 'rotterdam'] as const).map((id) => {
+    const airport = getAirport(id)
+    return { label: airport.name, lat: airport.lat, lon: airport.lon }
+  }),
+  { label: 'Station Ede-Wageningen, Ede', lat: 52.0265, lon: 5.6742, city: 'Ede' },
+]
 
 interface BookingFormState {
   origin: Location | null
@@ -176,7 +186,7 @@ export function BookingWidget({ className }: { className?: string }) {
                 <LocationInput
                   id="origin"
                   label="Ophaaladres"
-                  placeholder="Waar worden u opgehaald?"
+                  placeholder="Waar wordt u opgehaald?"
                   value={formState.origin}
                   onChange={(value) => updateField('origin', value)}
                   icon={<MapPin className="h-4 w-4 text-green-600" />}
@@ -197,6 +207,23 @@ export function BookingWidget({ className }: { className?: string }) {
                 onChange={(value) => updateField('destination', value)}
                 icon={<Navigation className="h-4 w-4 text-red-500" />}
               />
+              <div className="flex flex-wrap items-center gap-2 text-sm">
+                <span className="text-muted-foreground">Populair:</span>
+                {POPULAR_DESTINATIONS.map((destination) => (
+                  <button
+                    key={destination.label}
+                    type="button"
+                    onClick={() => updateField('destination', destination)}
+                    aria-pressed={formState.destination?.label === destination.label}
+                    className={cn(
+                      'rounded-full border px-3 py-1 transition-colors hover:border-primary',
+                      formState.destination?.label === destination.label && 'border-primary bg-primary/5'
+                    )}
+                  >
+                    {destination.label}
+                  </button>
+                ))}
+              </div>
 
               {/* Stopovers */}
               <StopoverInput
@@ -267,6 +294,17 @@ export function BookingWidget({ className }: { className?: string }) {
 
       {/* Results & Map */}
       <div className="space-y-6">
+        {!quote && !error && (
+          <Card className="border-dashed bg-muted/30">
+            <CardContent className="space-y-2 py-6 text-sm text-muted-foreground">
+              <p className="font-medium text-foreground">Naar Schiphol of een andere luchthaven?</p>
+              <p>
+                Vanuit Ede, Wageningen, Bennekom, Veenendaal en omgeving rijdt u voor een vaste prijs.
+                De calculator toont die prijs automatisch.
+              </p>
+            </CardContent>
+          </Card>
+        )}
         {quote ? (
           <>
             <QuoteResult quote={quote} error={error} onBookClick={handleBookClick} />
@@ -283,13 +321,9 @@ export function BookingWidget({ className }: { className?: string }) {
           </>
         ) : error ? (
           <QuoteResult quote={null} error={error} />
-        ) : (
-          <>
-          {/* Temporary skeletons */}
-            {/* <QuoteSkeleton />
-            <MapSkeleton /> */}
-          </>
-        )}
+        ) : isLoading ? (
+          <QuoteSkeleton />
+        ) : null}
       </div>
     </div>
   )
