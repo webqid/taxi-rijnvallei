@@ -90,6 +90,11 @@ export default function Footer() {
                   </Link>
                 </li>
               ))}
+              <li>
+                <Link href="/werkgebied" className="font-medium text-background transition-colors hover:underline">
+                  Alle plaatsen
+                </Link>
+              </li>
             </ul>
           </nav>
 

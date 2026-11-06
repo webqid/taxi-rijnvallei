@@ -43,10 +43,11 @@ export function getOrganizationSchema() {
       '@type': 'Place',
       address: { '@type': 'PostalAddress', ...address, addressCountry: 'NL' },
     })),
-    geo: { '@type': 'GeoCoordinates', latitude: 51.9692, longitude: 5.6654 },
+    // Tarthorst 64, Wageningen
+    geo: { '@type': 'GeoCoordinates', latitude: 51.9787, longitude: 5.6593 },
     areaServed: [
       ...LOCATIONS.map((location) => ({ '@type': 'City', name: location.name })),
-      ...['Rhenen', 'Renkum', 'Oosterbeek', 'Arnhem'].map((name) => ({ '@type': 'City', name })),
+      ...['Rhenen', 'Renkum', 'Oosterbeek'].map((name) => ({ '@type': 'City', name })),
     ],
     openingHoursSpecification: {
       '@type': 'OpeningHoursSpecification',

@@ -17,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     page('/', 1),
     page('/taxi-schiphol', 0.9),
     ...LOCATIONS.map((location) => page(`/${location.slug}`, 0.9)),
+    page('/werkgebied', 0.8),
     page('/tarieven', 0.8),
     page('/zakelijk-vervoer', 0.8),
     ...(SITE.features.priceCalculator ? [page('/bereken', 0.7)] : []),

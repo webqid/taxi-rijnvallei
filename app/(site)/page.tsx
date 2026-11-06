@@ -33,7 +33,7 @@ export default function Home() {
       <RoutePrices
         routes={HOME_ROUTES}
         title="Populaire ritten en prijzen"
-        description="Zo weet u vooraf ongeveer wat uw rit kost."
+        description="Zo weet u vooraf wat uw rit kost."
         airport={{ from: 'Ede of Wageningen', regionId: 'rijnvallei' }}
       />
       <AirportSection />

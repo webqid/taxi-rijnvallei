@@ -53,11 +53,11 @@ export const faqData: FAQItem[] = [
   {
     question: 'In welke plaatsen rijdt Taxi Rijnvallei?',
     answer:
-      'Taxi Rijnvallei is gevestigd in Ede en Wageningen en rijdt in de hele regio: Ede, Wageningen, Bennekom, Veenendaal, Lunteren, Barneveld, Rhenen, Renkum en omgeving. Wij verzorgen ook ritten naar luchthavens en andere bestemmingen in heel Nederland.',
+      'Taxi Rijnvallei is gevestigd in Ede en Wageningen en rijdt in de hele regio: Ede, Wageningen, Bennekom, Veenendaal, Lunteren, Barneveld, Arnhem, Rhenen, Renkum en omgeving. Wij verzorgen ook ritten naar luchthavens en andere bestemmingen in heel Nederland.',
   },
   {
     question: 'Wat kost een taxi in Ede en Wageningen?',
-    answer: `Ritten in de regio rijden wij op het taximetertarief: ${meterRatesSentence}. Een rit van Bennekom naar station Ede-Wageningen kost daarmee ${formatRoutePrice(getRoute('bennekom-station'))} en van Wageningen Campus naar station Ede-Wageningen ${formatRoutePrice(getRoute('wur-station'))}. ${ownRidePriceSentence}`,
+    answer: `Binnen Ede rijdt u voor een vaste prijs van ${formatRoutePrice(getRoute('ede-station'))}. Van station Ede-Wageningen naar Wageningen centrum kost ${formatRoutePrice(getRoute('station-wageningen'))} en naar Wageningen Campus ${formatRoutePrice(getRoute('station-wur'))}. Deze vaste prijzen gelden voor een enkele rit. Ritten zonder vaste prijs rijden wij op het taximetertarief: ${meterRatesSentence}. ${ownRidePriceSentence}`,
   },
   {
     question: 'Kan ik met meer dan 4 personen een taxi boeken?',

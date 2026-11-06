@@ -3,7 +3,9 @@ import { AirportFareConditions, AirportFareRegions, SchipholFareCard } from '@/c
 import ContactSection from '@/components/contact-section'
 import FaqSection from '@/components/faq-section'
 import { JsonLd } from '@/components/json-ld'
+import { SCHIPHOL_PHOTO } from '@/components/location-photos'
 import { PageHero } from '@/components/page-hero'
+import { PhotoFrame } from '@/components/photo-frame'
 import { ReviewsSection } from '@/components/reviews-section'
 import { SectionHeading } from '@/components/section-heading'
 import { AIRPORT_WAITING, formatPlaceList, getFareRegion } from '@/lib/config/airport-fares'
@@ -49,6 +51,14 @@ export default function AirportPage() {
         ]}
         aside={<SchipholFareCard regionId={region.id} />}
       />
+
+      <div className="container mx-auto px-4 pt-8 lg:pt-10">
+        <PhotoFrame
+          photo={SCHIPHOL_PHOTO}
+          className="aspect-video rounded-2xl sm:aspect-21/9"
+          sizes="(min-width: 1280px) 1216px, 100vw"
+        />
+      </div>
 
       <section className="py-20">
         <div className="container mx-auto px-4">

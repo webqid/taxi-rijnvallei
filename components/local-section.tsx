@@ -1,9 +1,9 @@
 import Link from 'next/link'
-import { MapPin } from 'lucide-react'
+import { ArrowRight, MapPin } from 'lucide-react'
 import { findLocationByName } from '@/lib/config/locations'
 
 const primaryAreas = ['Ede', 'Wageningen', 'Bennekom', 'Veenendaal', 'Lunteren', 'Barneveld']
-const secondaryAreas = ['Rhenen', 'Renkum', 'Doorwerth', 'Oosterbeek', 'Harskamp', 'Otterlo', 'Woudenberg', 'Scherpenzeel']
+export const SECONDARY_AREAS = ['Arnhem', 'Rhenen', 'Renkum', 'Doorwerth', 'Oosterbeek', 'Harskamp', 'Otterlo', 'Woudenberg', 'Scherpenzeel']
 
 function AreaChip({ name, primary }: { name: string; primary: boolean }) {
   const location = findLocationByName(name)
@@ -46,11 +46,16 @@ export default function LocalSection() {
             <div>
               <h3 className="mb-3 font-semibold">Daarnaast actief in</h3>
               <div className="flex flex-wrap gap-2">
-                {secondaryAreas.map((area) => (
+                {SECONDARY_AREAS.map((area) => (
                   <AreaChip key={area} name={area} primary={false} />
                 ))}
               </div>
             </div>
+
+            <Link href="/werkgebied" className="inline-flex items-center gap-1 font-semibold text-sky-700 hover:underline">
+              Bekijk alle plaatsen en prijzen
+              <ArrowRight className="size-4" aria-hidden="true" />
+            </Link>
 
             <p className="text-muted-foreground">
               Woont u in een andere plaats? Neem contact met ons op. Wij rijden door de hele regio en
@@ -61,7 +66,7 @@ export default function LocalSection() {
           <div className="relative">
             <div className="aspect-square overflow-hidden rounded-2xl bg-muted">
               <iframe
-                src="https://www.openstreetmap.org/export/embed.html?bbox=5.5%2C51.9%2C5.8%2C52.05&layer=mapnik&marker=51.9692%2C5.6654"
+                src="https://www.openstreetmap.org/export/embed.html?bbox=5.5%2C51.9%2C5.8%2C52.05&layer=mapnik&marker=51.9787%2C5.6593"
                 width="100%"
                 height="100%"
                 style={{ border: 0 }}

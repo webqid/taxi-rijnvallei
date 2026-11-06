@@ -18,7 +18,7 @@ import { pageMetadata } from '@/lib/seo'
 
 /*
  * Fallback for any other one-segment URL, for example older Google Ads landing
- * pages such as /taxi-arnhem. Real pages (/taxi-ede, /taxi-schiphol, ...) are
+ * pages such as /taxi-rhenen. Real pages (/taxi-ede, /taxi-schiphol, ...) are
  * static routes and take precedence over this one.
  *
  * These pages are `noindex`: they reuse the home page content, and indexing an
@@ -33,9 +33,8 @@ import { pageMetadata } from '@/lib/seo'
 
 type Params = Promise<{ slug: string }>
 
-/** Slugs prerendered at build time: the secondary service areas, plus Arnhem. */
+/** Slugs prerendered at build time: the secondary service areas. */
 const PRERENDERED_SLUGS = [
-  'taxi-arnhem',
   'taxi-rhenen',
   'taxi-renkum',
   'taxi-oosterbeek',

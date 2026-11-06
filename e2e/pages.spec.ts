@@ -8,9 +8,11 @@ const LANDING_PAGES = [
   { path: '/taxi-veenendaal', heading: 'Taxi in Veenendaal' },
   { path: '/taxi-lunteren', heading: 'Taxi in Lunteren' },
   { path: '/taxi-barneveld', heading: 'Taxi in Barneveld' },
+  { path: '/taxi-arnhem', heading: 'Taxi naar Arnhem' },
   { path: '/taxi-schiphol', heading: 'Taxi naar Schiphol voor een vaste prijs' },
   { path: '/zakelijk-vervoer', heading: 'Zakelijk taxivervoer in Ede, Wageningen en omgeving' },
   { path: '/tarieven', heading: 'Taxitarieven in Ede, Wageningen en omgeving' },
+  { path: '/werkgebied', heading: 'Taxi in Ede, Wageningen en de hele Rijnvallei' },
 ]
 
 test.describe('Landing pages', () => {
@@ -27,17 +29,37 @@ test.describe('Landing pages', () => {
   }
 
   test('unknown slugs render a noindex landing page', async ({ page }) => {
-    await page.goto('/taxi-arnhem')
-    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Taxi Arnhem')
+    await page.goto('/taxi-doorwerth')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Taxi Doorwerth')
     await expect(page.locator('meta[name="robots"][content*="noindex"]').first()).toBeAttached()
   })
 
   test('local pages link to each other through client-side navigation', async ({ page }) => {
     await page.goto('/taxi-ede')
-    await page.getByRole('navigation', { name: 'Taxi in de buurt' }).getByRole('link', { name: 'Taxi Bennekom' }).click()
+    await page.getByRole('navigation', { name: 'Taxi in andere plaatsen' }).getByRole('link', { name: 'Bennekom' }).click()
     await expect(page).toHaveURL(/\/taxi-bennekom$/)
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Taxi in Bennekom')
   })
+})
+
+test.describe('Photos on the local pages', () => {
+  for (const [path, alts] of [
+    ['/taxi-ede', ['Bloeiende heide bij zonsopkomst', 'Entree van het Kröller-Müller Museum', 'beeldentuin', 'Ziekenhuis Gelderse Vallei in Ede']],
+    ['/taxi-wageningen', ['Wageningen Campus van Wageningen University', 'Ziekenhuis Gelderse Vallei in Ede', 'Ziekenhuis Rijnstate in Arnhem']],
+    ['/taxi-veenendaal', ['Ziekenhuis Gelderse Vallei in Ede']],
+    ['/taxi-arnhem', ['Entree van Ziekenhuis Rijnstate in Arnhem', 'Station Arnhem Centraal']],
+    ['/taxi-schiphol', ['De ingang van Amsterdam Airport Schiphol']],
+  ] as const) {
+    test(`${path} shows its photos`, async ({ page }) => {
+      await page.goto(path)
+      for (const alt of alts) {
+        const image = page.getByRole('img', { name: new RegExp(alt) })
+        await image.scrollIntoViewIfNeeded()
+        await expect(image).toBeVisible()
+        await expect.poll(() => image.evaluate((el: HTMLImageElement) => el.complete && el.naturalWidth > 0)).toBe(true)
+      }
+    })
+  }
 })
 
 test.describe('Unknown URLs', () => {
@@ -81,14 +103,15 @@ test.describe('Price calculator hidden', () => {
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Uw taxi in Ede, Wageningen en omgeving')
   })
 
-  test('no page links to the calculator, but the example prices stay', async ({ page }) => {
+  test("no page links to the calculator, but the owner's route prices stay", async ({ page }) => {
     for (const path of ['/', '/taxi-ede', '/taxi-schiphol', '/zakelijk-vervoer']) {
       await page.goto(path)
       await expect(page.locator('a[href="/bereken"]')).toHaveCount(0)
     }
     await page.goto('/taxi-bennekom')
     await expect(page.getByRole('heading', { name: /Wat kost een taxi in Bennekom/ })).toBeVisible()
-    await expect(page.getByText(/ca\. €\d+/).first()).toBeVisible()
+    await expect(page.locator('#prijzen').getByText('€30–€45')).toBeVisible()
+    await expect(page.locator('#prijzen').getByText(/ca\. €/)).toHaveCount(0)
   })
 
   test('the sitemap does not list the calculator', async ({ request }) => {

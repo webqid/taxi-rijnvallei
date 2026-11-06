@@ -2,7 +2,6 @@ import Link from 'next/link'
 import { ArrowRight, Plane } from 'lucide-react'
 import { PhoneLink } from '@/components/contact-links'
 import { SectionHeading } from '@/components/section-heading'
-import { nightSurchargeSentence } from '@/lib/config/faq-data'
 import { getFareRegion } from '@/lib/config/airport-fares'
 import { formatRoutePrice, getRoute, type RouteId } from '@/lib/config/route-examples'
 import { SITE, whatsappHref } from '@/lib/config/site'
@@ -19,8 +18,8 @@ interface RoutePricesProps {
 /** Example prices for common routes, so visitors can estimate the price of their ride. */
 export function RoutePrices({
   routes,
-  title = 'Wat kost een taxi? Voorbeeldprijzen',
-  description = 'Zo weet u vooraf ongeveer wat uw rit kost.',
+  title = 'Wat kost een taxi? Vaste prijzen',
+  description = 'Zo weet u vooraf wat uw rit kost.',
   airport,
 }: RoutePricesProps) {
   const schipholFare = airport ? getFareRegion(airport.regionId).fares.schiphol : undefined
@@ -43,6 +42,7 @@ export function RoutePrices({
                     </p>
                     <p className="text-sm text-muted-foreground">
                       {route.distanceKm.toLocaleString('nl-NL')} km · ca. {route.durationMin} min
+                      {` · ${route.note ?? 'vaste prijs'}, enkele rit`}
                     </p>
                   </div>
                   <p className="shrink-0 text-lg font-bold tabular-nums">{formatRoutePrice(route)}</p>
@@ -70,8 +70,7 @@ export function RoutePrices({
           </ul>
 
           <p className="mt-4 text-sm text-muted-foreground">
-            Prijsindicatie op basis van het taximetertarief overdag, voor 1–4 personen.{' '}
-            {nightSurchargeSentence} Naar de luchthaven betaalt u een vaste prijs.
+            Vaste prijzen per taxi voor een enkele rit, inclusief 9% btw.
           </p>
           {SITE.features.priceCalculator ? (
             <Link

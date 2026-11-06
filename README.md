@@ -7,9 +7,10 @@ Website for Taxi Rijnvallei, a taxi company in Ede, Wageningen and the surroundi
 | URL | Purpose |
 | --- | --- |
 | `/` | Home: booking box (destination tiles with prices, sends the ride via WhatsApp), popular rides, airport fares, reviews, how it works, work area, FAQ, contact |
-| `/taxi-ede`, `/taxi-wageningen`, `/taxi-bennekom`, `/taxi-veenendaal`, `/taxi-lunteren`, `/taxi-barneveld` | Local landing pages with local text, example route prices, fixed airport fares and a local FAQ |
+| `/taxi-ede`, `/taxi-wageningen`, `/taxi-bennekom`, `/taxi-veenendaal`, `/taxi-lunteren`, `/taxi-barneveld`, `/taxi-arnhem` | Local landing pages with local text, the owner's fixed route prices, fixed airport fares and a local FAQ |
 | `/taxi-schiphol` | Airport landing page: fixed fares per region, free waiting time, how pickup works |
-| `/tarieven` | Taximeter rates, example route prices, airport fares per region, price FAQ |
+| `/werkgebied` | Overview of all places with their cheapest prices; the "Werkgebied" menu points here |
+| `/tarieven` | All fixed route prices, taximeter rates, airport fares per region, price FAQ |
 | `/zakelijk-vervoer` | Business transport: invoicing, account requests |
 | `/bereken` | Price calculator with reservation request. **Hidden** (redirects to `/`) while `SITE.features.priceCalculator` is `false` |
 | `/review` | Redirects to the Google review form (short link for cards and WhatsApp) |
@@ -24,16 +25,24 @@ Business details, prices and texts live in `lib/config`, not in the components:
 | `site.ts` | Phone numbers, WhatsApp, addresses, KvK, GTM ID, Google place ID, Web3Forms key |
 | `pricing.ts` | Taximeter rates, night surcharge, minimum fare |
 | `airport-fares.ts` | Fixed airport fares per region, waiting time, conditions |
-| `route-examples.ts` | Example routes with distance and driving time; prices are calculated from the taximeter rates. Set `fixedPrice` to override |
+| `route-examples.ts` | The owner's fixed route prices (single trip), with distance and driving time. Only the owner's own prices: no estimates |
 | `locations.ts` | Text, routes and FAQ of the local landing pages |
 | `reviews.ts` | Real customer reviews and the Google rating (empty until filled in) |
 | `faq-data.ts` | FAQ texts for the home, airport and business pages |
 
 The FAQ answers, page titles and structured data read prices from these files, so a price change is made in one place.
 
+### Navigation
+
+- **Header:** Luchthaven · Zakelijk · Tarieven · Werkgebied ▾ (a menu with every place; the label itself opens `/werkgebied`), the phone number and "Reserveren". The current page is marked (`aria-current`).
+- **"Reserveren"** goes to the booking box on the home page and to the contact form of the page you are on; from other pages (the 404 page) to the home page's contact form. See `reserveTarget` in `lib/navigation.ts`.
+- **Place switcher** under the hero of every city page, and "Alle plaatsen" in the footer.
+- Places are listed once, in `LOCATIONS` (`lib/config/locations.ts`); the header, switcher, footer, overview and sitemap all read it. A new place needs only a new entry and a page file.
+- The parts of the header that read the URL (`usePathname`) sit in `<Suspense>` with a static fallback: on `/[slug]` the URL is known at request time only.
+
 ### Price calculator
 
-The calculator is hidden. `SITE.features.priceCalculator` in `site.ts` is `false`, so no page links to it, `/bereken` redirects to the home page, the sitemap leaves it out and the texts don't mention it. The example route prices stay. Set the switch to `true` to bring it back; the calculator e2e tests then run again.
+The calculator is hidden. `SITE.features.priceCalculator` in `site.ts` is `false`, so no page links to it, `/bereken` redirects to the home page, the sitemap leaves it out and the texts don't mention it. The route prices stay. Set the switch to `true` to bring it back; the calculator e2e tests then run again.
 
 ### Call tracking
 

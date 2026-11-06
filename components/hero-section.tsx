@@ -2,7 +2,7 @@ import { CheckCircle, Star } from 'lucide-react'
 import { BookingBox, type QuickDestination } from '@/components/booking-box'
 import { AIRPORT_WAITING, lowestDropOffFare } from '@/lib/config/airport-fares'
 import { GOOGLE_RATING } from '@/lib/config/reviews'
-import { lowestRoutePriceTo } from '@/lib/config/route-examples'
+import { formatLowestPriceTo } from '@/lib/config/route-examples'
 
 const highlights = [
   `Vaste prijs naar Schiphol, ${AIRPORT_WAITING.freeMinutes} minuten gratis wachttijd bij ophalen`,
@@ -10,7 +10,7 @@ const highlights = [
   'Betalen met pin, contant of op factuur',
 ]
 
-const fromPrice = (destination: string) => `vanaf ca. €${lowestRoutePriceTo(destination)}`
+const fromPrice = formatLowestPriceTo
 
 const destinations: QuickDestination[] = [
   { name: 'Schiphol', price: `vanaf €${lowestDropOffFare('schiphol')} · vaste prijs` },
@@ -60,7 +60,7 @@ export default function HeroSection() {
 
         <BookingBox
           destinations={destinations}
-          priceNote="Prijsindicatie overdag voor 1–4 personen. Naar Schiphol een vaste prijs bij reservering minimaal 24 uur vooraf."
+          priceNote="Vaste prijzen per enkele rit. Naar Schiphol bij reservering minimaal 24 uur vooraf."
         />
       </div>
     </section>

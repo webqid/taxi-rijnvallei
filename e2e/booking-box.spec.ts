@@ -16,7 +16,8 @@ test.describe('Booking box on the home page', () => {
   test('shows destination tiles with prices in the HTML', async ({ page }) => {
     const tiles = page.getByRole('list', { name: 'Populaire bestemmingen' })
     await expect(tiles.getByRole('button', { name: /Schiphol.*vanaf €150.*vaste prijs/ })).toBeVisible()
-    await expect(tiles.getByRole('button', { name: /Station Ede-Wageningen.*vanaf ca\. €\d+/ })).toBeVisible()
+    await expect(tiles.getByRole('button', { name: /Station Ede-Wageningen.*vanaf €25/ })).toBeVisible()
+    await expect(tiles.getByRole('button', { name: /Wageningen Campus.*vanaf €30/ })).toBeVisible()
   })
 
   test('sends the ride as a prefilled WhatsApp message', async ({ page }) => {

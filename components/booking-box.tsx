@@ -12,7 +12,7 @@ import { cn } from '@/lib/utils'
 export interface QuickDestination {
   /** Filled in as the destination when the tile is chosen. */
   name: string
-  /** "€150 · vaste prijs" or "vanaf ca. €17". */
+  /** "vanaf €150 · vaste prijs" or "vanaf €25". */
   price: string
 }
 
@@ -69,7 +69,7 @@ export function BookingBox({ destinations, priceNote }: BookingBoxProps) {
   }
 
   return (
-    <div className="rounded-2xl border bg-card p-5 shadow-xl sm:p-7">
+    <div id="boeken" className="scroll-mt-24 rounded-2xl border bg-card p-5 shadow-xl sm:p-7">
       <h2 className="text-xl font-bold sm:text-2xl">Waar wilt u naartoe?</h2>
 
       <ul className="mt-4 grid grid-cols-2 gap-2" aria-label="Populaire bestemmingen">

@@ -31,7 +31,7 @@ export const SITE = {
 
   addresses: [
     { streetAddress: 'Grootveld 27', postalCode: '6715 EX', addressLocality: 'Ede' },
-    { streetAddress: 'Beekstraat 13', postalCode: '6707 DR', addressLocality: 'Wageningen' },
+    { streetAddress: 'Tarthorst 64', postalCode: '6708 JB', addressLocality: 'Wageningen' },
   ],
 
   /**

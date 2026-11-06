@@ -1,90 +1,87 @@
-import { estimateMeterFareCents, formatEuro } from '@/lib/services/pricing'
+import { formatEuro } from '@/lib/services/pricing'
 
 /**
- * Example routes with indicative prices, shown on the home page and the local
- * pages ("Wat kost een taxi van Bennekom naar station Ede-Wageningen?").
+ * Route prices shown on the home page, the local pages and /tarieven ("Wat kost
+ * een taxi van Bennekom naar station Ede-Wageningen?").
  *
- * Distances and driving times were measured with OSRM, the routing service the
- * price calculator uses, on 6 November 2026. The price is calculated from the
- * taximeter rates in `pricing.ts` (daytime, 1–4 persons), so it matches what the
- * calculator shows. To charge a fixed price for a route instead, set `fixedPrice`.
+ * Only the owner's own prices, received November 2026: fixed prices per taxi
+ * for a single trip (enkele rit). Do not add estimates here.
+ *
+ * Distances and driving times were measured with OSRM on 6 November 2026; they
+ * are shown next to the price.
  */
 export interface RouteExample {
   from: string
   to: string
   distanceKm: number
   durationMin: number
-  /** Fixed price in whole euros. Overrides the taximeter estimate when set. */
-  fixedPrice?: number
+  /** Fixed price in whole euros, for a single trip. */
+  fixedPrice: number
+  /** Second, higher price when the owner gave two ("€30/€45"); shown as a range. */
+  fixedPriceMax?: number
+  /** Replaces "vaste prijs" in the details line, e.g. "vaste prijs binnen Ede". */
+  note?: string
 }
 
+const WITHIN_EDE = { fixedPrice: 25, note: 'vaste prijs binnen Ede' }
+
 export const ROUTES = {
-  'ede-station': { from: 'Ede centrum', to: 'Station Ede-Wageningen', distanceKm: 3.2, durationMin: 6 },
-  'ede-ziekenhuis': { from: 'Ede centrum', to: 'Ziekenhuis Gelderse Vallei', distanceKm: 4.6, durationMin: 8 },
-  'ede-wur': { from: 'Ede centrum', to: 'Wageningen Campus (WUR)', distanceKm: 9.2, durationMin: 13 },
-  'ede-wageningen': { from: 'Ede centrum', to: 'Wageningen centrum', distanceKm: 13.3, durationMin: 19 },
-  'ede-veenendaal': { from: 'Ede centrum', to: 'Veenendaal centrum', distanceKm: 13.6, durationMin: 17 },
-  'ede-arnhem': { from: 'Ede centrum', to: 'Arnhem Centraal', distanceKm: 18.3, durationMin: 19 },
+  'ede-station': { from: 'Ede centrum', to: 'Station Ede-Wageningen', distanceKm: 3.2, durationMin: 6, ...WITHIN_EDE },
+  'ede-ziekenhuis': { from: 'Ede centrum', to: 'Ziekenhuis Gelderse Vallei', distanceKm: 4.6, durationMin: 8, ...WITHIN_EDE },
+  'station-kroller-muller': { from: 'Station Ede-Wageningen', to: 'Kröller-Müller Museum (De Hoge Veluwe)', distanceKm: 16.2, durationMin: 22, fixedPrice: 65 },
+  'otterlo-station': { from: 'Otterlo', to: 'Station Ede-Wageningen', distanceKm: 12.9, durationMin: 15, fixedPrice: 55 },
+  'wekerom-ede': { from: 'Wekerom', to: 'Ede', distanceKm: 8.7, durationMin: 11, fixedPrice: 45 },
+  'harskamp-ede': { from: 'Harskamp', to: 'Ede', distanceKm: 14.5, durationMin: 16, fixedPrice: 60 },
 
-  'wageningen-station': { from: 'Wageningen centrum', to: 'Station Ede-Wageningen', distanceKm: 10.3, durationMin: 15 },
-  'wur-station': { from: 'Wageningen Campus (WUR)', to: 'Station Ede-Wageningen', distanceKm: 6.7, durationMin: 9 },
-  'wageningen-ziekenhuis': { from: 'Wageningen centrum', to: 'Ziekenhuis Gelderse Vallei', distanceKm: 8.9, durationMin: 14 },
-  'wageningen-bennekom': { from: 'Wageningen centrum', to: 'Bennekom', distanceKm: 6.4, durationMin: 11 },
-  'wageningen-arnhem': { from: 'Wageningen centrum', to: 'Arnhem Centraal', distanceKm: 20.2, durationMin: 26 },
+  'station-wageningen': { from: 'Station Ede-Wageningen', to: 'Wageningen centrum', distanceKm: 10.3, durationMin: 15, fixedPrice: 45 },
+  'station-wur': { from: 'Station Ede-Wageningen', to: 'Wageningen Campus (WUR)', distanceKm: 6.7, durationMin: 9, fixedPrice: 30 },
 
-  'bennekom-station': { from: 'Bennekom', to: 'Station Ede-Wageningen', distanceKm: 3.6, durationMin: 7 },
-  'bennekom-ziekenhuis': { from: 'Bennekom', to: 'Ziekenhuis Gelderse Vallei', distanceKm: 5.2, durationMin: 8 },
-  'bennekom-wur': { from: 'Bennekom', to: 'Wageningen Campus (WUR)', distanceKm: 2.4, durationMin: 4 },
-  'bennekom-arnhem': { from: 'Bennekom', to: 'Arnhem Centraal', distanceKm: 22.5, durationMin: 22 },
+  'renkum-ziekenhuis': { from: 'Renkum of Heelsum', to: 'Ziekenhuis Gelderse Vallei', distanceKm: 10.2, durationMin: 13, fixedPrice: 45 },
+  'renkum-rijnstate': { from: 'Renkum', to: 'Ziekenhuis Rijnstate Arnhem', distanceKm: 21.4, durationMin: 19, fixedPrice: 70 },
+  'renkum-station': { from: 'Renkum', to: 'Station Ede-Wageningen', distanceKm: 11.6, durationMin: 15, fixedPrice: 45 },
 
-  'lunteren-station': { from: 'Lunteren', to: 'Station Ede-Wageningen', distanceKm: 9.8, durationMin: 14 },
-  'lunteren-ziekenhuis': { from: 'Lunteren', to: 'Ziekenhuis Gelderse Vallei', distanceKm: 8.7, durationMin: 13 },
-  'lunteren-barneveld': { from: 'Lunteren', to: 'Barneveld centrum', distanceKm: 7.6, durationMin: 11 },
-  'lunteren-amersfoort': { from: 'Lunteren', to: 'Amersfoort Centraal', distanceKm: 28.7, durationMin: 29 },
+  'bennekom-station': { from: 'Bennekom', to: 'Station Ede-Wageningen', distanceKm: 3.6, durationMin: 7, fixedPrice: 30, fixedPriceMax: 45 },
 
-  'veenendaal-de-klomp': { from: 'Veenendaal centrum', to: 'Station Veenendaal-De Klomp', distanceKm: 4.1, durationMin: 7 },
-  'veenendaal-ziekenhuis': { from: 'Veenendaal centrum', to: 'Ziekenhuis Gelderse Vallei', distanceKm: 10.4, durationMin: 12 },
-  'veenendaal-station-ede': { from: 'Veenendaal centrum', to: 'Station Ede-Wageningen', distanceKm: 11.8, durationMin: 14 },
-  'veenendaal-utrecht': { from: 'Veenendaal centrum', to: 'Utrecht Centraal', distanceKm: 37.6, durationMin: 35 },
+  'lunteren-station': { from: 'Lunteren', to: 'Station Ede-Wageningen', distanceKm: 9.8, durationMin: 14, fixedPrice: 35, fixedPriceMax: 50 },
 
-  'barneveld-station-ede': { from: 'Barneveld centrum', to: 'Station Ede-Wageningen', distanceKm: 20.4, durationMin: 22 },
-  'barneveld-ziekenhuis': { from: 'Barneveld centrum', to: 'Ziekenhuis Gelderse Vallei', distanceKm: 19.1, durationMin: 20 },
-  'barneveld-lunteren': { from: 'Barneveld centrum', to: 'Lunteren', distanceKm: 7.5, durationMin: 11 },
-  'barneveld-amersfoort': { from: 'Barneveld centrum', to: 'Amersfoort Centraal', distanceKm: 21.0, durationMin: 22 },
+  // Distance and time measured from Barneveld centrum; the owner's price covers Barneveld and surroundings.
+  'barneveld-ziekenhuis': { from: 'Barneveld en omgeving', to: 'Ziekenhuis Gelderse Vallei', distanceKm: 19.1, durationMin: 20, fixedPrice: 70 },
+
+  'veenendaal-ziekenhuis': { from: 'Veenendaal centrum', to: 'Ziekenhuis Gelderse Vallei', distanceKm: 10.4, durationMin: 12, fixedPrice: 40, fixedPriceMax: 50 },
 } satisfies Record<string, RouteExample>
 
 export type RouteId = keyof typeof ROUTES
 
-/** Routes highlighted on the home page. */
+/** Routes highlighted on the home page: all with the owner's own prices. */
 export const HOME_ROUTES: RouteId[] = [
+  'ede-station',
   'bennekom-station',
-  'ede-ziekenhuis',
-  'wur-station',
-  'wageningen-station',
-  'veenendaal-station-ede',
-  'ede-arnhem',
+  'station-wur',
+  'station-wageningen',
+  'lunteren-station',
+  'veenendaal-ziekenhuis',
+  'station-kroller-muller',
 ]
+
+/** Every route, for /tarieven. */
+export const FIXED_PRICE_ROUTES = Object.keys(ROUTES) as RouteId[]
 
 export function getRoute(id: RouteId): RouteExample {
   return ROUTES[id]
 }
 
-/** Price in whole euros: the fixed price, or the rounded taximeter estimate. */
-export function getRoutePrice(route: RouteExample): number {
-  return route.fixedPrice ?? Math.round(estimateMeterFareCents(route.distanceKm, route.durationMin) / 100)
-}
-
-/** Lowest example price to a destination, in whole euros ("vanaf ca. €17"). */
-export function lowestRoutePriceTo(destination: string): number {
-  const prices = Object.values(ROUTES as Record<string, RouteExample>)
-    .filter((route) => route.to === destination)
-    .map(getRoutePrice)
-  if (prices.length === 0) throw new Error(`No example route to ${destination}`)
-  return Math.min(...prices)
-}
-
-/** "ca. €18" for an estimate, "€18" for a fixed price. */
+/** "€25", or "€30–€45" when the owner gave two prices. */
 export function formatRoutePrice(route: RouteExample): string {
-  const price = formatEuro(getRoutePrice(route))
-  return route.fixedPrice ? price : `ca. ${price}`
+  return route.fixedPriceMax
+    ? `${formatEuro(route.fixedPrice)}–${formatEuro(route.fixedPriceMax)}`
+    : formatEuro(route.fixedPrice)
+}
+
+/** Lowest price to a destination, for "vanaf" labels: "vanaf €25". */
+export function formatLowestPriceTo(destination: string): string {
+  const prices = (Object.values(ROUTES) as RouteExample[])
+    .filter((route) => route.to === destination)
+    .map((route) => route.fixedPrice)
+  if (prices.length === 0) throw new Error(`No route to ${destination}`)
+  return `vanaf ${formatEuro(Math.min(...prices))}`
 }

@@ -19,8 +19,11 @@ import { SITE } from '@/lib/config/site'
 export interface LocationPage {
   slug: `taxi-${string}`
   name: string
-  /** Fare region for the fixed airport prices (see airport-fares.ts). */
-  fareRegionId: string
+  /**
+   * Fare region for the fixed airport prices (see airport-fares.ts). Leave out
+   * for a place without airport prices; the page then shows its route price.
+   */
+  fareRegionId?: string
   /** <title>, without the " | Taxi Rijnvallei" suffix. */
   title: string
   description: string
@@ -30,7 +33,6 @@ export interface LocationPage {
   destinations: { name: string; description: string }[]
   routes: RouteId[]
   faq: FAQItem[]
-  nearby: LocationPage['slug'][]
 }
 
 const price = (id: RouteId) => formatRoutePrice(getRoute(id))
@@ -41,12 +43,12 @@ const ede: LocationPage = {
   name: 'Ede',
   fareRegionId: 'rijnvallei',
   title: `Taxi Ede – 24/7, Schiphol €${schipholDropOff('rijnvallei')}`,
-  description: `Taxi in Ede nodig? Taxi Rijnvallei rijdt dag en nacht in Ede. Naar station Ede-Wageningen ${price('ede-station')}, vaste prijs naar Schiphol €${schipholDropOff('rijnvallei')}. Bel ${SITE.phone.display}.`,
+  description: `Taxi in Ede nodig? Binnen Ede rijdt u voor een vaste prijs van ${price('ede-station')}, naar Schiphol voor €${schipholDropOff('rijnvallei')}. Dag en nacht bereikbaar: bel ${SITE.phone.display}.`,
   heading: 'Taxi in Ede',
   lead: 'Dag en nacht een taxi in Ede: naar station Ede-Wageningen, Ziekenhuis Gelderse Vallei of voor een vaste prijs naar Schiphol.',
   intro: [
     'Taxi Rijnvallei is gevestigd in Ede en Wageningen en rijdt dag en nacht door heel Ede: van het centrum en Veldhuizen tot Kernhem, Rietkampen en Ede-Zuid. Ook in de dorpen van de gemeente Ede, zoals Bennekom, Lunteren, Ederveen, De Klomp, Otterlo en Harskamp, staan wij voor u klaar.',
-    'Ritten binnen Ede rijden wij op het taximetertarief, naar de luchthaven betaalt u een vaste prijs. Zo weet u vooraf waar u aan toe bent. Betalen kan met pin, contant, creditcard of op factuur.',
+    `Binnen Ede rijdt u voor een vaste prijs van ${price('ede-station')}. Ook vanuit de dorpen, naar het Kröller-Müller Museum en naar de luchthaven betaalt u een vaste prijs. Zo weet u vooraf waar u aan toe bent. Betalen kan met pin, contant, creditcard of op factuur.`,
   ],
   destinations: [
     {
@@ -62,15 +64,30 @@ const ede: LocationPage = {
       description: 'Voor de Valleilijn richting Lunteren, Barneveld en Amersfoort.',
     },
     {
+      name: 'Kröller-Müller Museum',
+      description: `In Nationaal Park De Hoge Veluwe bij Otterlo. Vanaf station Ede-Wageningen ${price('station-kroller-muller')}.`,
+    },
+    {
       name: 'Bedrijven in Ede',
       description: 'Zakelijke ritten voor bedrijven en instellingen, met facturatie achteraf.',
     },
   ],
-  routes: ['ede-station', 'ede-ziekenhuis', 'ede-wur', 'ede-veenendaal', 'ede-arnhem'],
+  routes: [
+    'ede-station',
+    'ede-ziekenhuis',
+    'station-kroller-muller',
+    'otterlo-station',
+    'harskamp-ede',
+    'wekerom-ede',
+  ],
   faq: [
     {
       question: 'Wat kost een taxi in Ede?',
-      answer: `Binnen Ede rijden wij op het taximetertarief: ${meterRatesSentence}. Een rit van Ede centrum naar station Ede-Wageningen kost daarmee ${price('ede-station')} en naar Ziekenhuis Gelderse Vallei ${price('ede-ziekenhuis')}. ${ownRidePriceSentence}`,
+      answer: `Binnen Ede rijdt u voor een vaste prijs van ${price('ede-station')}, bijvoorbeeld van het centrum naar station Ede-Wageningen of Ziekenhuis Gelderse Vallei. Vanuit Otterlo naar station Ede-Wageningen kost ${price('otterlo-station')}, vanuit Wekerom naar Ede ${price('wekerom-ede')} en vanuit Harskamp ${price('harskamp-ede')}. Deze vaste prijzen gelden voor een enkele rit. ${ownRidePriceSentence}`,
+    },
+    {
+      question: 'Wat kost een taxi van station Ede-Wageningen naar het Kröller-Müller Museum?',
+      answer: `Een taxi van station Ede-Wageningen naar het Kröller-Müller Museum kost een vaste prijs van ${price('station-kroller-muller')} voor een enkele rit. Het museum ligt in Nationaal Park De Hoge Veluwe bij Otterlo, op ongeveer twintig minuten rijden.`,
     },
     {
       question: 'Wat kost een taxi van Ede naar Schiphol?',
@@ -91,7 +108,6 @@ const ede: LocationPage = {
       answer: `Ja, Taxi Rijnvallei is 24 uur per dag bereikbaar, ook in het weekend en op feestdagen. ${nightSurchargeSentence}`,
     },
   ],
-  nearby: ['taxi-bennekom', 'taxi-wageningen', 'taxi-lunteren', 'taxi-veenendaal'],
 }
 
 const wageningen: LocationPage = {
@@ -99,7 +115,7 @@ const wageningen: LocationPage = {
   name: 'Wageningen',
   fareRegionId: 'rijnvallei',
   title: `Taxi Wageningen – 24/7, Schiphol €${schipholDropOff('rijnvallei')}`,
-  description: `Taxi in Wageningen nodig? Wij rijden 24/7 naar station Ede-Wageningen (${price('wur-station')} vanaf de Campus) en voor een vaste prijs naar Schiphol (€${schipholDropOff('rijnvallei')}).`,
+  description: `Taxi in Wageningen: van station Ede-Wageningen naar Wageningen ${price('station-wageningen')}, naar Wageningen Campus ${price('station-wur')} en naar Schiphol €${schipholDropOff('rijnvallei')}. Dag en nacht.`,
   heading: 'Taxi in Wageningen',
   lead: 'Uw taxi in Wageningen, dag en nacht: naar station Ede-Wageningen, Wageningen Campus of voor een vaste prijs naar Schiphol.',
   intro: [
@@ -121,14 +137,14 @@ const wageningen: LocationPage = {
     },
     {
       name: 'Arnhem',
-      description: 'Naar Arnhem Centraal of uw afspraak in Arnhem.',
+      description: 'Naar Arnhem Centraal, Ziekenhuis Rijnstate of uw afspraak in Arnhem.',
     },
   ],
-  routes: ['wageningen-station', 'wur-station', 'wageningen-ziekenhuis', 'wageningen-bennekom', 'wageningen-arnhem'],
+  routes: ['station-wageningen', 'station-wur'],
   faq: [
     {
-      question: 'Wat kost een taxi van Wageningen naar station Ede-Wageningen?',
-      answer: `Vanaf Wageningen centrum kost een taxi naar station Ede-Wageningen ${price('wageningen-station')}, vanaf Wageningen Campus ${price('wur-station')}. Dit is een indicatie op basis van het taximetertarief overdag voor 1–4 personen.`,
+      question: 'Wat kost een taxi van station Ede-Wageningen naar Wageningen?',
+      answer: `Van station Ede-Wageningen naar Wageningen centrum kost een taxi een vaste prijs van ${price('station-wageningen')}, naar Wageningen Campus ${price('station-wur')}. Deze prijzen gelden voor een enkele rit.`,
     },
     {
       question: 'Wat kost een taxi van Wageningen naar Schiphol?',
@@ -144,7 +160,6 @@ const wageningen: LocationPage = {
       answer: `Ja, wij zijn 24/7 bereikbaar. Voor een vroege rit naar het station of Schiphol reserveert u het best vooraf. ${nightSurchargeSentence}`,
     },
   ],
-  nearby: ['taxi-bennekom', 'taxi-ede', 'taxi-veenendaal', 'taxi-lunteren'],
 }
 
 const bennekom: LocationPage = {
@@ -152,7 +167,7 @@ const bennekom: LocationPage = {
   name: 'Bennekom',
   fareRegionId: 'rijnvallei',
   title: `Taxi Bennekom – 24/7, Schiphol €${schipholDropOff('rijnvallei')}`,
-  description: `Taxi in Bennekom: naar station Ede-Wageningen ${price('bennekom-station')}, naar Wageningen Campus ${price('bennekom-wur')} en voor een vaste prijs naar Schiphol (€${schipholDropOff('rijnvallei')}). Dag en nacht bereikbaar.`,
+  description: `Taxi in Bennekom: naar station Ede-Wageningen ${price('bennekom-station')} en voor een vaste prijs naar Schiphol (€${schipholDropOff('rijnvallei')}). Dag en nacht bereikbaar.`,
   heading: 'Taxi in Bennekom',
   lead: `Vanuit Bennekom in een paar minuten bij station Ede-Wageningen (${price('bennekom-station')}) of voor een vaste prijs naar Schiphol.`,
   intro: [
@@ -174,14 +189,14 @@ const bennekom: LocationPage = {
     },
     {
       name: 'Arnhem',
-      description: 'Naar Arnhem Centraal of uw afspraak in Arnhem.',
+      description: 'Naar Arnhem Centraal, Ziekenhuis Rijnstate of uw afspraak in Arnhem.',
     },
   ],
-  routes: ['bennekom-station', 'bennekom-ziekenhuis', 'bennekom-wur', 'bennekom-arnhem'],
+  routes: ['bennekom-station'],
   faq: [
     {
       question: 'Wat kost een taxi van Bennekom naar station Ede-Wageningen?',
-      answer: `Een taxi van Bennekom naar station Ede-Wageningen kost ${price('bennekom-station')}. Dit is een indicatie op basis van het taximetertarief overdag voor 1–4 personen; de rit duurt ongeveer zeven minuten.`,
+      answer: `Een taxi van Bennekom naar station Ede-Wageningen kost ${price('bennekom-station')} voor een enkele rit. De rit duurt ongeveer zeven minuten.`,
     },
     {
       question: 'Wat kost een taxi van Bennekom naar Schiphol?',
@@ -193,7 +208,6 @@ const bennekom: LocationPage = {
         'Ja. Wij zijn 24/7 bereikbaar. Reserveer uw rit vooraf via telefoon, WhatsApp of het contactformulier, dan staan wij op het afgesproken tijdstip voor de deur.',
     },
   ],
-  nearby: ['taxi-ede', 'taxi-wageningen', 'taxi-veenendaal', 'taxi-lunteren'],
 }
 
 const veenendaal: LocationPage = {
@@ -201,7 +215,7 @@ const veenendaal: LocationPage = {
   name: 'Veenendaal',
   fareRegionId: 'rijnvallei',
   title: `Taxi Veenendaal – 24/7, Schiphol €${schipholDropOff('rijnvallei')}`,
-  description: `Taxi in Veenendaal: naar station Veenendaal-De Klomp ${price('veenendaal-de-klomp')}, naar Ziekenhuis Gelderse Vallei ${price('veenendaal-ziekenhuis')} en voor een vaste prijs naar Schiphol (€${schipholDropOff('rijnvallei')}).`,
+  description: `Taxi in Veenendaal: naar Ziekenhuis Gelderse Vallei ${price('veenendaal-ziekenhuis')} en voor een vaste prijs naar Schiphol (€${schipholDropOff('rijnvallei')}). Dag en nacht bereikbaar.`,
   heading: 'Taxi in Veenendaal',
   lead: 'Uw taxi in Veenendaal, dag en nacht: naar station Veenendaal-De Klomp, het ziekenhuis in Ede of voor een vaste prijs naar Schiphol.',
   intro: [
@@ -226,11 +240,11 @@ const veenendaal: LocationPage = {
       description: 'Naar Utrecht Centraal of uw afspraak in Utrecht.',
     },
   ],
-  routes: ['veenendaal-de-klomp', 'veenendaal-ziekenhuis', 'veenendaal-station-ede', 'veenendaal-utrecht'],
+  routes: ['veenendaal-ziekenhuis'],
   faq: [
     {
       question: 'Wat kost een taxi in Veenendaal?',
-      answer: `Wij rijden op het taximetertarief: ${meterRatesSentence}. Een rit van Veenendaal centrum naar station Veenendaal-De Klomp kost daarmee ${price('veenendaal-de-klomp')}.`,
+      answer: `Naar Ziekenhuis Gelderse Vallei rijdt u voor een vaste prijs van ${price('veenendaal-ziekenhuis')} (enkele rit). Andere ritten rijden wij op het taximetertarief: ${meterRatesSentence}. ${ownRidePriceSentence}`,
     },
     {
       question: 'Wat kost een taxi van Veenendaal naar Schiphol?',
@@ -238,10 +252,9 @@ const veenendaal: LocationPage = {
     },
     {
       question: 'Rijden jullie van Veenendaal naar Ziekenhuis Gelderse Vallei?',
-      answer: `Ja. Een rit van Veenendaal centrum naar het ziekenhuis in Ede kost ${price('veenendaal-ziekenhuis')}. Wij halen u na afloop ook weer op, en de chauffeur helpt u desgewenst bij het in- en uitstappen.`,
+      answer: `Ja. Een enkele rit van Veenendaal centrum naar het ziekenhuis in Ede kost ${price('veenendaal-ziekenhuis')}. Wij halen u na afloop ook weer op, en de chauffeur helpt u desgewenst bij het in- en uitstappen.`,
     },
   ],
-  nearby: ['taxi-ede', 'taxi-wageningen', 'taxi-bennekom', 'taxi-barneveld'],
 }
 
 const lunteren: LocationPage = {
@@ -249,7 +262,7 @@ const lunteren: LocationPage = {
   name: 'Lunteren',
   fareRegionId: 'gelderse-vallei',
   title: `Taxi Lunteren – 24/7, Schiphol €${schipholDropOff('gelderse-vallei')}`,
-  description: `Taxi in Lunteren: naar station Ede-Wageningen ${price('lunteren-station')}, naar Barneveld ${price('lunteren-barneveld')} en voor een vaste prijs naar Schiphol (€${schipholDropOff('gelderse-vallei')}). Dag en nacht bereikbaar.`,
+  description: `Taxi in Lunteren: naar station Ede-Wageningen ${price('lunteren-station')} en voor een vaste prijs naar Schiphol (€${schipholDropOff('gelderse-vallei')}). Dag en nacht bereikbaar.`,
   heading: 'Taxi in Lunteren',
   lead: 'Dag en nacht een taxi in Lunteren: naar station Ede-Wageningen, het ziekenhuis in Ede, Barneveld of voor een vaste prijs naar Schiphol.',
   intro: [
@@ -274,11 +287,11 @@ const lunteren: LocationPage = {
       description: 'Naar Amersfoort Centraal of uw afspraak in Amersfoort.',
     },
   ],
-  routes: ['lunteren-station', 'lunteren-ziekenhuis', 'lunteren-barneveld', 'lunteren-amersfoort'],
+  routes: ['lunteren-station'],
   faq: [
     {
       question: 'Wat kost een taxi in Lunteren?',
-      answer: `Wij rijden op het taximetertarief: ${meterRatesSentence}. Een rit van Lunteren naar station Ede-Wageningen kost daarmee ${price('lunteren-station')} en naar Barneveld ${price('lunteren-barneveld')}.`,
+      answer: `Een enkele rit van Lunteren naar station Ede-Wageningen kost ${price('lunteren-station')}. Andere ritten rijden wij op het taximetertarief: ${meterRatesSentence}. ${ownRidePriceSentence}`,
     },
     {
       question: 'Wat kost een taxi van Lunteren naar Schiphol?',
@@ -289,7 +302,6 @@ const lunteren: LocationPage = {
       answer: `Ja, Taxi Rijnvallei is 24 uur per dag bereikbaar. ${nightSurchargeSentence}`,
     },
   ],
-  nearby: ['taxi-ede', 'taxi-barneveld', 'taxi-bennekom', 'taxi-veenendaal'],
 }
 
 const barneveld: LocationPage = {
@@ -297,7 +309,7 @@ const barneveld: LocationPage = {
   name: 'Barneveld',
   fareRegionId: 'gelderse-vallei',
   title: `Taxi Barneveld – 24/7, Schiphol €${schipholDropOff('gelderse-vallei')}`,
-  description: `Taxi in Barneveld en omgeving: naar Lunteren ${price('barneveld-lunteren')}, naar Amersfoort Centraal ${price('barneveld-amersfoort')} en voor een vaste prijs naar Schiphol (€${schipholDropOff('gelderse-vallei')}).`,
+  description: `Taxi in Barneveld en omgeving: naar Ziekenhuis Gelderse Vallei ${price('barneveld-ziekenhuis')} en voor een vaste prijs naar Schiphol (€${schipholDropOff('gelderse-vallei')}). Dag en nacht bereikbaar.`,
   heading: 'Taxi in Barneveld',
   lead: 'Dag en nacht een taxi in Barneveld en omgeving: naar het station, het ziekenhuis of voor een vaste prijs naar Schiphol.',
   intro: [
@@ -311,7 +323,7 @@ const barneveld: LocationPage = {
     },
     {
       name: 'Ziekenhuis Gelderse Vallei',
-      description: 'Het ziekenhuis in Ede, voor afspraken en bezoek.',
+      description: `Het ziekenhuis in Ede, voor afspraken en bezoek. Vanuit Barneveld en omgeving ${price('barneveld-ziekenhuis')} (enkele rit).`,
     },
     {
       name: 'Amersfoort',
@@ -322,7 +334,7 @@ const barneveld: LocationPage = {
       description: 'Het buurdorp, op ongeveer elf minuten rijden.',
     },
   ],
-  routes: ['barneveld-station-ede', 'barneveld-ziekenhuis', 'barneveld-amersfoort', 'barneveld-lunteren'],
+  routes: ['barneveld-ziekenhuis'],
   faq: [
     {
       question: 'Wat kost een taxi van Barneveld naar Schiphol?',
@@ -330,18 +342,60 @@ const barneveld: LocationPage = {
     },
     {
       question: 'Wat kost een taxi in Barneveld?',
-      answer: `Wij rijden op het taximetertarief: ${meterRatesSentence}. Een rit van Barneveld naar Lunteren kost daarmee ${price('barneveld-lunteren')} en naar station Ede-Wageningen ${price('barneveld-station-ede')}.`,
+      answer: `Naar Ziekenhuis Gelderse Vallei in Ede rijdt u vanuit Barneveld en omgeving voor een vaste prijs van ${price('barneveld-ziekenhuis')} (enkele rit). Andere ritten rijden wij op het taximetertarief: ${meterRatesSentence}. ${ownRidePriceSentence}`,
     },
     {
       question: 'Rijden jullie ook in Voorthuizen en Kootwijkerbroek?',
       answer: `Ja. Naar Schiphol rijdt u vanuit Voorthuizen voor €${schipholDropOff('gelderse-vallei')} en vanuit Kootwijkerbroek voor €${schipholDropOff('veluwe')}. Andere ritten rijden wij op het taximetertarief.`,
     },
   ],
-  nearby: ['taxi-lunteren', 'taxi-ede', 'taxi-veenendaal'],
+}
+
+const arnhem: LocationPage = {
+  slug: 'taxi-arnhem',
+  name: 'Arnhem',
+  title: 'Taxi Arnhem – 24/7, ook naar Rijnstate',
+  description: `Taxi naar Arnhem en Ziekenhuis Rijnstate vanuit Ede, Wageningen, Bennekom en Renkum. Vanuit Renkum naar Rijnstate ${price('renkum-rijnstate')}, vaste prijs. Bel ${SITE.phone.display}.`,
+  heading: 'Taxi naar Arnhem',
+  lead: `Dag en nacht een taxi naar Arnhem: naar Ziekenhuis Rijnstate, station Arnhem Centraal of uw afspraak. Vanuit Renkum naar Rijnstate rijdt u voor een vaste prijs van ${price('renkum-rijnstate')}.`,
+  intro: [
+    'Taxi Rijnvallei is gevestigd in Ede en Wageningen en rijdt dag en nacht naar Arnhem. Vanuit Ede centrum is Arnhem Centraal ongeveer 18 kilometer en 19 minuten rijden, vanuit Wageningen ongeveer 20 kilometer en 26 minuten en vanuit Bennekom ongeveer 22 kilometer.',
+    'Wij brengen u naar uw afspraak bij Ziekenhuis Rijnstate en halen u daarna weer op. Vanuit Renkum rijdt u voor een vaste prijs naar het ziekenhuis; voor andere vertrekplaatsen maken wij graag een prijsopgave. Betalen kan met pin, contant, creditcard of op factuur.',
+  ],
+  destinations: [
+    {
+      name: 'Ziekenhuis Rijnstate',
+      description: `Voor een afspraak, onderzoek of bezoek. Vanuit Renkum ${price('renkum-rijnstate')} (enkele rit).`,
+    },
+    {
+      name: 'Arnhem Centraal',
+      description: 'Het centrale station van Arnhem, voor de intercity en regionale treinen.',
+    },
+    {
+      name: 'Terug naar Ede en Wageningen',
+      description: 'Ook voor de terugrit naar Ede, Wageningen, Bennekom en omgeving.',
+    },
+  ],
+  routes: ['renkum-rijnstate'],
+  faq: [
+    {
+      question: 'Wat kost een taxi naar Ziekenhuis Rijnstate in Arnhem?',
+      answer: `Vanuit Renkum kost een taxi naar Ziekenhuis Rijnstate een vaste prijs van ${price('renkum-rijnstate')} (enkele rit). Voor andere vertrekplaatsen rijden wij op het taximetertarief: ${meterRatesSentence}. ${ownRidePriceSentence}`,
+    },
+    {
+      question: 'Rijden jullie naar Arnhem?',
+      answer:
+        'Ja, dag en nacht, vanuit Ede, Wageningen, Bennekom, Renkum en omgeving. Vanuit Ede centrum is Arnhem Centraal ongeveer 18 kilometer (19 minuten) rijden, vanuit Wageningen ongeveer 20 kilometer (26 minuten).',
+    },
+    {
+      question: 'Kan ik een taxi naar Arnhem vooraf reserveren?',
+      answer: `Ja. Reserveer via telefoon (${SITE.phone.display}), WhatsApp of het contactformulier, dan staan wij op het afgesproken tijdstip voor de deur. Moet u vroeg in de ochtend in Arnhem zijn, reserveer dan de dag ervoor.`,
+    },
+  ],
 }
 
 /** Order used in navigation and link lists. */
-export const LOCATIONS: LocationPage[] = [ede, wageningen, bennekom, veenendaal, lunteren, barneveld]
+export const LOCATIONS: LocationPage[] = [ede, wageningen, bennekom, veenendaal, lunteren, barneveld, arnhem]
 
 export function getLocation(slug: LocationPage['slug']): LocationPage {
   const location = LOCATIONS.find((l) => l.slug === slug)
